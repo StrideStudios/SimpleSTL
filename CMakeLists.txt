@@ -13,35 +13,35 @@ option(SIMPLESTL_TEST "Enable Testing SimpleSTL Features" ${PROJECT_IS_TOP_LEVEL
 
 add_library(SimpleSTL INTERFACE
         # Base Classes
-        include/Pair.h
-        include/Container.h
+        include/simplestl/Pair.h
+        include/simplestl/Container.h
 
         # Sequence Containers
-        include/Vector.h
-        include/Deque.h
-        include/List.h
-        include/ForwardList.h
-        include/Array.h
+        include/simplestl/Vector.h
+        include/simplestl/Deque.h
+        include/simplestl/List.h
+        include/simplestl/ForwardList.h
+        include/simplestl/Array.h
 
         # Sorted Sequence Containers
-        include/MinHeap.h
-        include/MaxHeap.h
+        include/simplestl/MinHeap.h
+        include/simplestl/MaxHeap.h
 
         # Container Adaptors
-        include/Queue.h
-        include/Stack.h
+        include/simplestl/Queue.h
+        include/simplestl/Stack.h
 
         # Associative Containers
-        include/Set.h
-        include/MultiSet.h
-        include/Map.h
-        include/MultiMap.h
+        include/simplestl/Set.h
+        include/simplestl/MultiSet.h
+        include/simplestl/Map.h
+        include/simplestl/MultiMap.h
 
         # Sorted Associative Containers
-        include/PrioritySet.h
-        include/PriorityMultiSet.h
-        include/PriorityMap.h
-        include/PriorityMultiMap.h
+        include/simplestl/PrioritySet.h
+        include/simplestl/PriorityMultiSet.h
+        include/simplestl/PriorityMap.h
+        include/simplestl/PriorityMultiMap.h
 )
 
 # If not overridden, STL CSS Standard is the same as parent
@@ -62,6 +62,12 @@ target_compile_definitions(SimpleSTL INTERFACE CXX_VERSION=${SimpleSTL_CXX_STAND
 
 # Ensure target is compiled with CXX Version
 target_compile_features(SimpleSTL INTERFACE "cxx_std_${SimpleSTL_CXX_STANDARD}")
+
+# Include Files
+target_include_directories(SimpleSTL INTERFACE
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
 
 if(SIMPLESTL_TEST)
     enable_testing()
