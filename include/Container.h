@@ -1,0 +1,240 @@
+﻿#pragma once
+
+#include <functional>
+#include <stdexcept>
+
+#include "Pair.h"
+
+#if CXX_VERSION >= 17
+#define IF_CONSTEXPR if constexpr
+#else
+#define IF_CONSTEXPR if
+#endif
+
+// Makes it easy to see if a function is guaranteed or not
+#define GUARANTEED = 0;
+#define NOT_GUARANTEED { throw std::runtime_error("Attempted Usage of unimplemented function in TContainer."); }
+
+template <class TType>
+constexpr bool is_copyable_v = std::is_nothrow_copy_assignable_v<TType> && std::is_copy_constructible_v<TType>;
+
+template <class TType>
+constexpr bool is_moveable_v = std::is_nothrow_move_assignable_v<TType> && std::is_move_constructible_v<TType>;
+
+// A basic container of any amount of objects
+// A size of 0 implies a dynamic array
+template <typename TType, size_t TSize = 0>
+struct TSequenceContainer {
+
+	virtual ~TSequenceContainer() = default;
+
+	// Returns the size of the container
+	[[nodiscard]] virtual size_t getSize() const
+		GUARANTEED
+
+	// Gets the first element possible, or the 'top' of the container
+	virtual TType& top()
+		NOT_GUARANTEED
+	// Gets the first element possible, or the 'top' of the container
+	virtual const TType& top() const
+		GUARANTEED
+
+	TType* data() { return &top(); }
+	const TType* data() const { return &top(); }
+
+	// Get an element at a specified index
+	// Note: Certain limited containers will ignore index and return top, ex: queue or stack
+	virtual TType& get(size_t index)
+		GUARANTEED
+	// Get an element at a specified index
+	// Note: Certain limited containers will ignore index and return top, ex: queue or stack
+	virtual const TType& get(size_t index) const
+		GUARANTEED
+
+	virtual TType& operator[](const size_t index) { return get(index); }
+	virtual const TType& operator[](const size_t index) const { return get(index); }
+
+	// Fills container with n defaulted elements
+	virtual void resize(size_t amt = TSize)
+		GUARANTEED
+
+	// Fills container with TType& elements with size TSize
+	void resize(std::function<void(TType&)> func) {
+		resize(TSize, func);
+	}
+	// Fills container with TType& elements with size amt
+	virtual void resize(size_t amt, std::function<void(TType&, size_t)> func)
+		GUARANTEED
+
+	// Reserves memory for n elements
+	virtual void reserve(size_t amt = TSize)
+		NOT_GUARANTEED
+
+	// Adds a defaulted element to the container
+	virtual TType& push()
+		GUARANTEED
+	// Adds an element to the container, returning the index where it was added
+	virtual size_t push(const TType& obj)
+		GUARANTEED
+	// Adds an element to the container, returning the index where it was added
+	virtual size_t push(TType&& obj)
+		GUARANTEED
+	// Inserts an element at a specified index
+	virtual void push(size_t index, const TType& obj)
+		GUARANTEED
+	// Inserts an element at a specified index
+	virtual void push(size_t index, TType&& obj)
+		GUARANTEED
+
+	// Replaces an element at a specified index, and returns the original
+	virtual void replace(size_t index, const TType&)
+		GUARANTEED
+	// Replaces an element at a specified index, and returns the original
+	virtual void replace(size_t index, TType&&)
+		GUARANTEED
+
+	// Removes the topmost element from the container
+	virtual void pop()
+		GUARANTEED
+	// Removes an element at the specified index, returning the element
+	virtual void pop(size_t index)
+		GUARANTEED
+
+	// Iterates through each element
+	virtual void forEach(const std::function<void(size_t, TType&)>& func)
+		GUARANTEED
+	// Iterates through each element in reverse, not guaranteed because some containers cannot be iterated both ways, such as forward_list
+	virtual void forEachReverse(const std::function<void(size_t, TType&)>& func)
+		NOT_GUARANTEED
+};
+
+// Designed to be a container with a key for indexing
+template <typename TKeyType, typename TValueType = TKeyType>
+struct TAssociativeContainer {
+
+	virtual ~TAssociativeContainer() = default;
+
+	// Returns the size of the container
+	[[nodiscard]] virtual size_t getSize() const
+		GUARANTEED
+
+	// Gets the first element possible, or the 'top' of the container
+	virtual TPair<TKeyType, const TValueType&> top() const
+		GUARANTEED
+
+	// Get an element at a specified index
+	virtual TValueType& get(const TKeyType& key)
+		GUARANTEED
+	// Get an element at a specified index
+	virtual const TValueType& get(const TKeyType& key) const
+		GUARANTEED
+
+	// Fills container with n defaulted elements
+	virtual void resize(size_t amt)
+		GUARANTEED
+
+	// Fills container with TType& elements with size amt
+	virtual void resize(size_t amt, std::function<void(TPair<TKeyType, TValueType>&)> func)
+		GUARANTEED
+
+	// Reserves memory for n elements
+	virtual void reserve(size_t amt)
+		NOT_GUARANTEED
+
+	// Adds a defaulted element to the container
+	virtual TPair<TKeyType, const TValueType&> push()
+		GUARANTEED
+	// Adds a defaulted element at key to the container
+	virtual TValueType& push(const TKeyType& key)
+		GUARANTEED
+	// Adds an element value at key to the container
+	virtual TValueType& push(const TKeyType& key, const TValueType& value)
+		GUARANTEED
+	// Adds an element value at key to the container
+	virtual TValueType& push(const TKeyType& key, TValueType&& value)
+		GUARANTEED
+	// Adds an element to the container
+	virtual void push(const TPair<TKeyType, TValueType>& pair)
+		GUARANTEED
+	// Adds an element to the container
+	virtual void push(TPair<TKeyType, TValueType>&& pair)
+		GUARANTEED
+	// Replaces a specified element at key with another element
+	virtual void replace(const TKeyType& key, const TValueType& obj)
+		GUARANTEED
+	// Replaces a specified element at key with another element
+	virtual void replace(const TKeyType& key, TValueType&& obj)
+		GUARANTEED
+
+	// Removes the topmost element from the container
+	virtual void pop()
+		GUARANTEED
+
+	// Removes an element at key from the container
+	virtual void pop(const TKeyType& key)
+		GUARANTEED
+
+	// Iterates through each element (Maps do not support reverse iteration)
+	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func)
+		GUARANTEED
+};
+
+// Designed to be a container without indexing
+template <typename TType>
+struct TSingleAssociativeContainer {
+
+	virtual ~TSingleAssociativeContainer() = default;
+
+	// Returns the size of the container
+	[[nodiscard]] virtual size_t getSize() const
+		GUARANTEED
+
+	// Gets the first element possible, or the 'top' of the container
+	virtual const TType& top() const
+		GUARANTEED
+
+	const TType* data() const { return &top(); }
+
+	// Fills container with n defaulted elements
+	virtual void resize(size_t amt)
+		GUARANTEED
+
+	// Fills container with TType& elements with size amt
+	virtual void resize(size_t amt, std::function<void(TType&)> func)
+		GUARANTEED
+
+	// Reserves memory for n elements
+	virtual void reserve(size_t amt)
+		NOT_GUARANTEED
+
+	// Adds a defaulted element to the container
+	virtual const TType& push()
+		GUARANTEED
+	// Adds an element to the container
+	virtual void push(const TType& obj)
+		GUARANTEED
+	// Adds an element to the container
+	virtual void push(TType&& obj)
+		GUARANTEED
+
+	// Replaces a specified element with another element
+	virtual void replace(const TType&, const TType&)
+		GUARANTEED
+	// Replaces a specified element with another element
+	virtual void replace(const TType&, TType&&)
+		GUARANTEED
+
+	// Removes the topmost element from the container
+	virtual void pop()
+		GUARANTEED
+	// Removes an element from the container
+	virtual void pop(const TType&)
+		GUARANTEED
+
+	// Iterates through each element
+	virtual void forEach(const std::function<void(const TType&)>& func)
+		GUARANTEED
+	// Iterates through each element in reverse, not guaranteed because some containers cannot be iterated both ways, such as forward_list
+	virtual void forEachReverse(const std::function<void(const TType&)>& func)
+		NOT_GUARANTEED
+};
