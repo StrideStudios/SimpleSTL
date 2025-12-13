@@ -18,6 +18,10 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 		return TPair<TKeyType, const TValueType&>{*m_Container.end()};
 	}
 
+	virtual bool contains(const TKeyType& key) const override {
+		return CONTAINS(m_Container, key);
+	}
+
 	virtual TValueType& get(const TKeyType& key) override {
 		return m_Container.find(key)->second;
 	}
@@ -51,7 +55,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual TValueType& push(const TKeyType& key, const TValueType& value) override {
-		if constexpr (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (is_copyable_v<TValueType>) {
 			push(TPair<TKeyType, TValueType>{key, value});
 			return get(key);
 		} else {
@@ -60,7 +64,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual TValueType& push(const TKeyType& key, TValueType&& value) override {
-		if constexpr (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (is_moveable_v<TValueType>) {
 			push(TPair<TKeyType, TValueType>{key, std::move(value)});
 			return get(key);
 		} else {
@@ -69,7 +73,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void push(const TPair<TKeyType, TValueType>& pair) override {
-		if constexpr (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (is_copyable_v<TValueType>) {
 			m_Container.emplace(pair.key, pair.value);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -77,7 +81,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void push(TPair<TKeyType, TValueType>&& pair) override {
-		if constexpr (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (is_moveable_v<TValueType>) {
 			m_Container.emplace(std::move(pair.key), std::move(pair.value));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -85,7 +89,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void replace(const TKeyType& key, const TValueType& obj) override {
-		if constexpr (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (is_copyable_v<TValueType>) {
 			pop(key);
 			push(TPair<TKeyType, TValueType>{key, obj});
 		} else {
@@ -94,7 +98,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void replace(const TKeyType& key, TValueType&& obj) override {
-		if constexpr (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (is_moveable_v<TValueType>) {
 			pop(key);
 			push(TPair<TKeyType, TValueType>{key, std::move(obj)});
 		} else {

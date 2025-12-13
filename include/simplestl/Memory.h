@@ -25,12 +25,32 @@ struct TUnique {
 
 	const TType* get() const { return m_ptr.get(); }
 
+	operator bool() const {
+		return get() != nullptr;
+	}
+
 	friend bool operator<(const TUnique& fst, const TUnique& snd) {
-		return *fst.get() < *snd.get();
+		return fst.m_ptr < snd.m_ptr;
+	}
+
+	friend bool operator<=(const TUnique& fst, const TUnique& snd) {
+		return fst.m_ptr <= snd.m_ptr;
+	}
+
+	friend bool operator>(const TUnique& fst, const TUnique& snd) {
+		return fst.m_ptr > snd.m_ptr;
+	}
+
+	friend bool operator>=(const TUnique& fst, const TUnique& snd) {
+		return fst.m_ptr >= snd.m_ptr;
 	}
 
 	friend bool operator==(const TUnique& fst, const TUnique& snd) {
-		return *fst.get() == *snd.get();
+		return fst.m_ptr == snd.m_ptr;
+	}
+
+	friend bool operator!=(const TUnique& fst, const TUnique& snd) {
+		return fst.m_ptr != snd.m_ptr;
 	}
 
 	friend size_t getHash(const TUnique& obj) {
@@ -66,12 +86,32 @@ struct TShared {
 
 	const TType* get() const { return m_ptr.get(); }
 
+	operator bool() const {
+		return get() != nullptr;
+	}
+
 	friend bool operator<(const TShared& fst, const TShared& snd) {
-		return *fst.get() < *snd.get();
+		return fst.m_ptr < snd.m_ptr;
+	}
+
+	friend bool operator<=(const TShared& fst, const TShared& snd) {
+		return fst.m_ptr <= snd.m_ptr;
+	}
+
+	friend bool operator>(const TShared& fst, const TShared& snd) {
+		return fst.m_ptr > snd.m_ptr;
+	}
+
+	friend bool operator>=(const TShared& fst, const TShared& snd) {
+		return fst.m_ptr >= snd.m_ptr;
 	}
 
 	friend bool operator==(const TShared& fst, const TShared& snd) {
-		return *fst.get() == *snd.get();
+		return fst.m_ptr == snd.m_ptr;
+	}
+
+	friend bool operator!=(const TShared& fst, const TShared& snd) {
+		return fst.m_ptr != snd.m_ptr;
 	}
 
 	friend size_t getHash(const TShared& obj) {
@@ -103,37 +143,41 @@ struct TUnfurled<TUnique<TType>> {
 };
 
 template <typename TType>
-TUnfurled<TType>::Type* getUnfurled(TType* type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type->get();
-	} else {
-		return type;
-	}
+TType* getUnfurled(TType* type) {
+	return type;
 }
 
 template <typename TType>
-const TUnfurled<TType>::Type* getUnfurled(const TType* type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type->get();
-	} else {
-		return type;
-	}
+const TType* getUnfurled(const TType* type) {
+	return type;
 }
 
 template <typename TType>
-TUnfurled<TType>::Type* getUnfurled(TType& type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type.get();
-	} else {
-		return &type;
-	}
+TType* getUnfurled(TType& type) {
+	return &type;
 }
 
 template <typename TType>
-const TUnfurled<TType>::Type* getUnfurled(const TType& type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type.get();
-	} else {
-		return &type;
-	}
+const TType* getUnfurled(const TType& type) {
+	return &type;
+}
+
+template <typename TType>
+TType* getUnfurled(TShared<TType>& type) {
+	return type.get();
+}
+
+template <typename TType>
+const TType* getUnfurled(const TShared<TType>& type) {
+	return type.get();
+}
+
+template <typename TType>
+TType* getUnfurled(TUnique<TType>& type) {
+	return type.get();
+}
+
+template <typename TType>
+const TType* getUnfurled(const TUnique<TType>& type) {
+	return type.get();
 }

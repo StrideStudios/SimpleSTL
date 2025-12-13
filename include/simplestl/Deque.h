@@ -5,7 +5,6 @@
 
 template <typename TType>
 struct TDeque : TSequenceContainer<TType> {
-
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
 	}
@@ -24,6 +23,10 @@ struct TDeque : TSequenceContainer<TType> {
 
 	virtual const TType& bottom() const override {
 		return m_Container.back();
+	}
+
+	virtual bool contains(const TType& obj) const override {
+		return FIND(m_Container, obj);
 	}
 
 	virtual TType& get(size_t index) override {
@@ -52,7 +55,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			m_Container.emplace_back(obj);
 			return getSize() - 1;
 		} else {
@@ -61,7 +64,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			m_Container.emplace_back(std::move(obj));
 			return getSize() - 1;
 		} else {
@@ -70,7 +73,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			m_Container.insert(m_Container.begin() + index, obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -78,7 +81,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			m_Container.insert(m_Container.begin() + index, std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -86,7 +89,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			pop(index);
 			push(index, obj);
 		} else {
@@ -95,7 +98,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			pop(index);
 			push(index, std::move(obj));
 		} else {

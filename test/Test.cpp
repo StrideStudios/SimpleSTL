@@ -52,7 +52,10 @@ template <typename TType, size_t TSize>
 requires std::is_base_of_v<SObject, typename TUnfurled<TType>::Type>
 void containerTest(const std::string& containerName, TSequenceContainer<TType, TSize>& container) {
 
-	container.push(SObject{100, "Hello"});
+	TType obj = SObject{100, "Hello"};
+	TType obj2 = SObject{100, "Hello"};
+	container.push(std::move(obj));
+	std::cout << "Container " << containerName << (container.contains(obj2) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {
@@ -83,7 +86,10 @@ template <typename TType>
 requires std::is_base_of_v<SObject, typename TUnfurled<TType>::Type>
 void containerTest(const std::string& containerName, TSingleAssociativeContainer<TType>& container) {
 
-	container.push(SObject{100, "Hello"});
+	TType obj = SObject{100, "Hello"};
+	TType obj2 = SObject{100, "Hello"};
+	container.push(std::move(obj));
+	std::cout << "Container " << containerName << (container.contains(obj2) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {
@@ -134,7 +140,9 @@ template <typename TType>
 requires std::is_base_of_v<SObject, typename TUnfurled<TType>::Type>
 void containerTest(const std::string& containerName, TAssociativeContainer<MapEnum, TType>& container) {
 
-	container.push(MapEnum::NONE, SObject{100, "Hello"});
+	TType obj = SObject{100, "Hello"};
+	container.push(MapEnum::NONE, std::move(obj));
+	std::cout << "Container " << containerName << (container.contains(MapEnum::NONE) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
 
 	std::vector<size_t> vec;
 	for (size_t i = 1; i < 10; ++i) {

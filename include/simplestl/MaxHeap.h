@@ -28,6 +28,10 @@ struct TMaxHeap : TSequenceContainer<TType> {
 		return m_Container.back();
 	}
 
+	virtual bool contains(const TType& obj) const override {
+		return FIND(m_Container, obj);
+	}
+
 	virtual TType& get(size_t index) override {
 		return m_Container[index];
 	}
@@ -61,7 +65,7 @@ struct TMaxHeap : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			m_Container.push_back(obj);
 			std::push_heap(m_Container.begin(), m_Container.end(), std::less<TType>{});
 			return getSize() - 1;
@@ -71,7 +75,7 @@ struct TMaxHeap : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			m_Container.push_back(std::move(obj));
 			std::push_heap(m_Container.begin(), m_Container.end(), std::less<TType>{});
 			return getSize() - 1;
@@ -110,7 +114,7 @@ protected:
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			push(index, obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -118,7 +122,7 @@ protected:
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			push(index, std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");

@@ -18,6 +18,10 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 		return *m_Container.end();
 	}
 
+	virtual bool contains(const TType& obj) const override {
+		return CONTAINS(m_Container, obj);
+	}
+
 	virtual void resize(const size_t amt) override {
 		for (size_t i = getSize(); i < amt; ++i) {
 			m_Container.emplace();
@@ -38,7 +42,7 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void push(const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			m_Container.emplace(obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -46,7 +50,7 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void push(TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {
+		IF_CONSTEXPR (is_moveable_v<TType>) {
 			m_Container.emplace(std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -54,7 +58,7 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void replace(const TType& tgt, const TType& obj) override {
-		if constexpr (is_copyable_v<TType>) {
+		IF_CONSTEXPR (is_copyable_v<TType>) {
 			// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
 			m_Container.insert(obj);
@@ -64,7 +68,7 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void replace(const TType& tgt, TType&& obj) override {
-		if constexpr (is_moveable_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
+		IF_CONSTEXPR (is_moveable_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
 			m_Container.insert(std::move(obj));
 		} else {

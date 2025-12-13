@@ -3,6 +3,7 @@
 #include <functional>
 #include <stdexcept>
 
+#include "Memory.h"
 #include "Pair.h"
 
 #if CXX_VERSION >= 17
@@ -11,15 +12,23 @@
 #define IF_CONSTEXPR if
 #endif
 
+#if CXX_VERSION >= 20
+#define FIND(c, x) std::ranges::find(c, x) != c.end();
+#define CONTAINS(c, x) c.contains(x);
+#else
+#define FIND(c, x) std::find(c.begin(), c.end(), x) != c.end();
+#define CONTAINS(c, x) c.find(x) != c.end();
+#endif
+
 // Makes it easy to see if a function is guaranteed or not
 #define GUARANTEED = 0;
 #define NOT_GUARANTEED { throw std::runtime_error("Attempted Usage of unimplemented function in TContainer."); }
 
 template <class TType>
-constexpr bool is_copyable_v = std::is_nothrow_copy_assignable_v<TType> && std::is_copy_constructible_v<TType>;
+constexpr bool is_copyable_v = /*std::is_nothrow_copy_assignable_v<TType> &&*/ std::is_copy_constructible_v<TType>;
 
 template <class TType>
-constexpr bool is_moveable_v = std::is_nothrow_move_assignable_v<TType> && std::is_move_constructible_v<TType>;
+constexpr bool is_moveable_v = /*std::is_nothrow_move_assignable_v<TType> &&*/ std::is_move_constructible_v<TType>;
 
 // A basic container of any amount of objects
 // A size of 0 implies a dynamic array
@@ -45,6 +54,15 @@ struct TSequenceContainer {
 	// Gets the first element possible, or the 'top' of the container
 	virtual const TType& bottom() const
 		NOT_GUARANTEED
+
+	// Checks if a certain index is contained within the container
+	virtual bool contains(const size_t index) const {
+		return index > 0 && index < getSize();
+	}
+
+	// Checks if a certain object is contained within the container
+	virtual bool contains(const TType& obj) const
+		GUARANTEED
 
 	// Get an element at a specified index
 	// Note: Certain limited containers will ignore index and return top, ex: queue or stack
@@ -130,10 +148,14 @@ struct TAssociativeContainer {
 	virtual TPair<TKeyType, const TValueType&> bottom() const
 		GUARANTEED
 
-	// Get an element at a specified index
+	// Checks if a certain key is contained within the container
+	virtual bool contains(const TKeyType& key) const
+		GUARANTEED
+
+	// Get an element at a specified key
 	virtual TValueType& get(const TKeyType& key)
 		GUARANTEED
-	// Get an element at a specified index
+	// Get an element at a specified key
 	virtual const TValueType& get(const TKeyType& key) const
 		GUARANTEED
 
@@ -205,7 +227,14 @@ struct TSingleAssociativeContainer {
 	virtual const TType& bottom() const
 		GUARANTEED
 
-	const TType* data() const { return &top(); }
+	// Checks if a certain index is contained within the container
+	virtual bool contains(const size_t index) const {
+		return index > 0 && index < getSize();
+	}
+
+	// Checks if a certain object is contained within the container
+	virtual bool contains(const TType& obj) const
+		GUARANTEED
 
 	// Fills container with n defaulted elements
 	virtual void resize(size_t amt)
