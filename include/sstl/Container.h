@@ -118,7 +118,7 @@ struct TSequenceContainer {
 	// Removes the topmost element from the container
 	virtual void pop()
 		GUARANTEED
-	// Removes an element at the specified index, returning the element
+	// Removes an element at the specified index
 	virtual void pop(size_t index)
 		GUARANTEED
 
