@@ -50,16 +50,18 @@ struct TArray : TSequenceContainer<TType, TSize> {
 		for (size_t i = 0; i < getSize(); ++i) {
 			if (!m_IsPopulated[i]) {
 				m_Container[i] = {};
+				m_IsPopulated[i] = true;
 			}
 		}
-		m_IsPopulated.fill(true);
 	}
 
 	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
 		for (size_t i = 0; i < getSize(); ++i) {
-			func(get(i), i);
+			if (!m_IsPopulated[i]) {
+				func(get(i), i);
+				m_IsPopulated[i] = true;
+			}
 		}
-		m_IsPopulated.fill(true);
 	}
 
 	virtual TType& push() override {
@@ -67,7 +69,7 @@ struct TArray : TSequenceContainer<TType, TSize> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			for (size_t i = 0; i < getSize(); ++i) {
 				if (!m_IsPopulated[i]) { //is not populated
 					m_IsPopulated[i] = true;
@@ -82,7 +84,7 @@ struct TArray : TSequenceContainer<TType, TSize> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			for (size_t i = 0; i < getSize(); ++i) {
 				if (!m_IsPopulated[i]) { //is not populated
 					m_IsPopulated[i] = true;
@@ -105,7 +107,7 @@ struct TArray : TSequenceContainer<TType, TSize> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			m_Container[index] = obj;
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -113,7 +115,7 @@ struct TArray : TSequenceContainer<TType, TSize> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			m_Container[index] = std::move(obj);
 		} else {
 			throw std::runtime_error("Type is not moveable!");

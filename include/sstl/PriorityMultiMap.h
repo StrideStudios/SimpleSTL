@@ -55,7 +55,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual TValueType& push(const TKeyType& key, const TValueType& value) override {
-		IF_CONSTEXPR (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TValueType>) {
 			push(TPair<TKeyType, TValueType>{key, value});
 			return get(key);
 		} else {
@@ -64,7 +64,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual TValueType& push(const TKeyType& key, TValueType&& value) override {
-		IF_CONSTEXPR (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TValueType>) {
 			push(TPair<TKeyType, TValueType>{key, std::move(value)});
 			return get(key);
 		} else {
@@ -73,7 +73,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void push(const TPair<TKeyType, TValueType>& pair) override {
-		IF_CONSTEXPR (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TValueType>) {
 			m_Container.emplace(pair.key, pair.value);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -81,7 +81,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void push(TPair<TKeyType, TValueType>&& pair) override {
-		IF_CONSTEXPR (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TValueType>) {
 			m_Container.emplace(std::move(pair.key), std::move(pair.value));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -89,7 +89,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void replace(const TKeyType& key, const TValueType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TValueType>) {
 			pop(key);
 			push(TPair<TKeyType, TValueType>{key, obj});
 		} else {
@@ -98,7 +98,7 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual void replace(const TKeyType& key, TValueType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TValueType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TValueType>) {
 			pop(key);
 			push(TPair<TKeyType, TValueType>{key, std::move(obj)});
 		} else {

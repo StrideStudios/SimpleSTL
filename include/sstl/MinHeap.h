@@ -65,7 +65,7 @@ struct TMinHeap : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			m_Container.push_back(obj);
 			std::push_heap(m_Container.begin(), m_Container.end(), MinCmp{});
 			return getSize() - 1;
@@ -75,7 +75,7 @@ struct TMinHeap : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			m_Container.push_back(std::move(obj));
 			std::push_heap(m_Container.begin(), m_Container.end(), MinCmp{});
 			return getSize() - 1;
@@ -118,7 +118,7 @@ protected:
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			push(index, obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -126,7 +126,7 @@ protected:
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			push(index, std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");

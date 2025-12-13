@@ -42,7 +42,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void push(const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			m_Container.emplace(obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -50,7 +50,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void push(TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			m_Container.emplace(std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -58,7 +58,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void replace(const TType& tgt, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
 			m_Container.insert(obj);
@@ -68,7 +68,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void replace(const TType& tgt, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
 			m_Container.insert(std::move(obj));
 		} else {

@@ -24,12 +24,6 @@
 #define GUARANTEED = 0;
 #define NOT_GUARANTEED { throw std::runtime_error("Attempted Usage of unimplemented function in TContainer."); }
 
-template <class TType>
-constexpr bool is_copyable_v = /*std::is_nothrow_copy_assignable_v<TType> &&*/ std::is_copy_constructible_v<TType>;
-
-template <class TType>
-constexpr bool is_moveable_v = /*std::is_nothrow_move_assignable_v<TType> &&*/ std::is_move_constructible_v<TType>;
-
 // A basic container of any amount of objects
 // A size of 0 implies a dynamic array
 template <typename TType, size_t TSize = 0>

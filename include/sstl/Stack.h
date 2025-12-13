@@ -20,7 +20,7 @@ struct TStack : TDeque<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			TDeque<TType>::m_Container.emplace_front(obj);
 			return 0;
 		} else {
@@ -29,7 +29,7 @@ struct TStack : TDeque<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			TDeque<TType>::m_Container.emplace_front(std::move(obj));
 			return 0;
 		} else {
@@ -38,7 +38,7 @@ struct TStack : TDeque<TType> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			TDeque<TType>::pop(index);
 			TDeque<TType>::push(index, obj);
 		} else {
@@ -47,7 +47,7 @@ struct TStack : TDeque<TType> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			TDeque<TType>::pop(index);
 			TDeque<TType>::push(index, std::move(obj));
 		} else {

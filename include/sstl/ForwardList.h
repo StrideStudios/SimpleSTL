@@ -54,7 +54,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			m_Container.emplace_front(obj);
 			m_Size++;
 			return getSize() - 1;
@@ -64,7 +64,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			m_Container.emplace_front(std::move(obj));
 			m_Size++;
 			return getSize() - 1;
@@ -74,7 +74,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			auto itr = m_Container.before_begin();
 			std::advance(itr, index);
 			m_Container.insert_after(itr, obj);
@@ -85,7 +85,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			auto itr = m_Container.before_begin();
 			std::advance(itr, index);
 			m_Container.insert_after(itr, std::move(obj));
@@ -96,7 +96,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (is_copyable_v<TType>) {
+		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
 			pop(index);
 			push(index, obj);
 		} else {
@@ -105,7 +105,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (is_moveable_v<TType>) {
+		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
 			pop(index);
 			push(index, std::move(obj));
 		} else {
