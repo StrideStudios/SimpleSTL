@@ -25,6 +25,7 @@ struct TUnique {
 	TUnique(TUnique<TOtherType>&) = delete;
 
 	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
 	TUnique(TUnique<TOtherType>&& otr): m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
 	TUnique(TUnique&& otr): m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
@@ -136,6 +137,7 @@ struct TShared {
 	TShared(TShared<TOtherType>&) = delete;
 
 	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
 	TShared(TShared<TOtherType>&& otr): m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
 	TShared(TShared&& otr): m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
