@@ -7,11 +7,59 @@ struct TUnique {
 
 	TUnique(): m_ptr(std::make_unique<TType>()) {}
 
-	TUnique(const TType& inValue): m_ptr(std::make_unique<TType>(inValue)) {}
-
 	template <typename... TArgs>
-	requires std::is_constructible_v<TType, TArgs...>
-	TUnique(const TArgs... args): m_ptr(std::make_unique<TType>(args...)) {}
+	TUnique(TArgs&&... args): m_ptr(std::make_unique<TType>(args...)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TUnique(const TOtherType& otr): m_ptr(std::make_unique<TOtherType>(otr)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TUnique(TOtherType&& otr): m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
+
+	template <typename TOtherType>
+	TUnique(const TUnique<TOtherType>&) = delete;
+
+	template <typename TOtherType>
+	TUnique(TUnique<TOtherType>&) = delete;
+
+	template <typename TOtherType>
+	TUnique(TUnique<TOtherType>&& otr): m_ptr(std::move(otr.m_ptr)) {}
+
+	TUnique(TUnique&& otr): m_ptr(std::move(otr.m_ptr)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TUnique& operator=(const TOtherType& otr) noexcept {
+		this->m_ptr = std::make_unique<TOtherType>(otr);
+		return *this;
+	}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TUnique& operator=(TOtherType&& otr) noexcept {
+		this->m_ptr = std::make_unique<TOtherType>(std::forward<TOtherType>(otr));
+		return *this;
+	}
+
+	template <typename TOtherType>
+	TUnique& operator=(const TUnique<TOtherType>& otr) = delete;
+
+	template <typename TOtherType>
+	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TUnique& operator=(TUnique<TOtherType>&& otr) noexcept {
+		this->m_ptr = std::move(otr.m_ptr);
+		return *this;
+	}
+
+	TUnique& operator=(TUnique&& otr) noexcept {
+		this->m_ptr = std::move(otr.m_ptr);
+		return *this;
+	}
 
 	TType* operator->() const {
 		return m_ptr.get();
@@ -58,6 +106,8 @@ struct TUnique {
 	}
 
 private:
+	template <typename>
+	friend struct TUnique;
 
 	std::unique_ptr<TType> m_ptr;
 
@@ -68,11 +118,59 @@ struct TShared {
 
 	TShared(): m_ptr(std::make_shared<TType>()) {}
 
-	TShared(const TType& inValue): m_ptr(std::make_shared<TType>(inValue)) {}
-
 	template <typename... TArgs>
-	requires std::is_constructible_v<TType, TArgs...>
-	TShared(const TArgs... args): m_ptr(std::make_shared<TType>(args...)) {}
+	TShared(TArgs&&... args): m_ptr(std::make_shared<TType>(args...)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TShared(const TOtherType& otr): m_ptr(std::make_shared<TOtherType>(otr)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TShared(TOtherType&& otr): m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
+
+	template <typename TOtherType>
+	TShared(const TShared<TOtherType>&) = delete;
+
+	template <typename TOtherType>
+	TShared(TShared<TOtherType>&) = delete;
+
+	template <typename TOtherType>
+	TShared(TShared<TOtherType>&& otr): m_ptr(std::move(otr.m_ptr)) {}
+
+	TShared(TShared&& otr): m_ptr(std::move(otr.m_ptr)) {}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TShared& operator=(const TOtherType& otr) noexcept {
+		this->m_ptr = std::make_shared<TOtherType>(otr);
+		return *this;
+	}
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TShared& operator=(TOtherType&& otr) noexcept {
+		this->m_ptr = std::make_shared<TOtherType>(std::forward<TOtherType>(otr));
+		return *this;
+	}
+
+	template <typename TOtherType>
+	TShared& operator=(const TShared<TOtherType>& otr) = delete;
+
+	template <typename TOtherType>
+	TShared& operator=(TShared<TOtherType>& otr) = delete;
+
+	template <typename TOtherType>
+	requires std::is_base_of_v<TType, TOtherType>
+	TShared& operator=(TShared<TOtherType>&& otr) noexcept {
+		this->m_ptr = std::move(otr.m_ptr);
+		return *this;
+	}
+
+	TShared& operator=(TShared&& otr) noexcept {
+		this->m_ptr = std::move(otr.m_ptr);
+		return *this;
+	}
 
 	TType* operator->() const {
 		return m_ptr.get();
@@ -120,7 +218,13 @@ struct TShared {
 
 private:
 
+	template <typename>
+	friend struct TShared;
+
 	std::shared_ptr<TType> m_ptr;
+
+	TShared(const TShared&) = delete;
+	TShared& operator=(const TShared&) = delete;
 
 };
 
