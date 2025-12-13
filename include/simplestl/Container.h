@@ -34,13 +34,17 @@ struct TSequenceContainer {
 
 	// Gets the first element possible, or the 'top' of the container
 	virtual TType& top()
-		NOT_GUARANTEED
+		GUARANTEED
 	// Gets the first element possible, or the 'top' of the container
 	virtual const TType& top() const
 		GUARANTEED
 
-	TType* data() { return &top(); }
-	const TType* data() const { return &top(); }
+	// Gets the first element possible, or the 'top' of the container
+	virtual TType& bottom()
+		NOT_GUARANTEED
+	// Gets the first element possible, or the 'top' of the container
+	virtual const TType& bottom() const
+		NOT_GUARANTEED
 
 	// Get an element at a specified index
 	// Note: Certain limited containers will ignore index and return top, ex: queue or stack
@@ -122,6 +126,10 @@ struct TAssociativeContainer {
 	virtual TPair<TKeyType, const TValueType&> top() const
 		GUARANTEED
 
+	// Gets the last element possible, or the 'bottom' of the container
+	virtual TPair<TKeyType, const TValueType&> bottom() const
+		GUARANTEED
+
 	// Get an element at a specified index
 	virtual TValueType& get(const TKeyType& key)
 		GUARANTEED
@@ -191,6 +199,10 @@ struct TSingleAssociativeContainer {
 
 	// Gets the first element possible, or the 'top' of the container
 	virtual const TType& top() const
+		GUARANTEED
+
+	// Gets the last element possible, or the 'bottom' of the container
+	virtual const TType& bottom() const
 		GUARANTEED
 
 	const TType* data() const { return &top(); }

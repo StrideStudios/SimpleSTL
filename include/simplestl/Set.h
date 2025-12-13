@@ -14,6 +14,10 @@ struct TSet : TSingleAssociativeContainer<TType> {
 		return *m_Container.begin();
 	}
 
+	virtual const TType& bottom() const override {
+		return *m_Container.end();
+	}
+
 	virtual void resize(const size_t amt) override {
 		for (size_t i = getSize(); i < amt; ++i) {
 			m_Container.emplace();

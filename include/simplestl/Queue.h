@@ -78,6 +78,14 @@ struct TQueue : TDeque<TType> {
 
 protected:
 
+	virtual TType& bottom() override {
+		throw std::runtime_error("TQueue can only be access in one direction!");
+	}
+
+	virtual const TType& bottom() const override {
+		throw std::runtime_error("TQueue can only be access in one direction!");
+	}
+
 	virtual TType& get(size_t index) override {
 		return top();
 	}

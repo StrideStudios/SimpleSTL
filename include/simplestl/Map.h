@@ -14,6 +14,10 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 		return TPair<TKeyType, const TValueType&>{*m_Container.begin()};
 	}
 
+	virtual TPair<TKeyType, const TValueType&> bottom() const override {
+		return TPair<TKeyType, const TValueType&>{*m_Container.end()};
+	}
+
 	virtual TValueType& get(const TKeyType& key) override {
 		return m_Container.at(key);
 	}

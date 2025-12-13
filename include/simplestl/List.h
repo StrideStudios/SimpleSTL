@@ -18,6 +18,14 @@ struct TList : TSequenceContainer<TType> {
 		return m_Container.front();
 	}
 
+	virtual TType& bottom() override {
+		return m_Container.back();
+	}
+
+	virtual const TType& bottom() const override {
+		return m_Container.back();
+	}
+
 	virtual TType& get(size_t index) override {
 		auto itr = m_Container.begin();
 		std::advance(itr, index);

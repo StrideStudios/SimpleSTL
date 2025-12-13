@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <utility>
+#include <cassert>
 
 #include "simplestl/Array.h"
 #include "simplestl/Deque.h"

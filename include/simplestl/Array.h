@@ -22,6 +22,14 @@ struct TArray : TSequenceContainer<TType, TSize> {
 		return m_Container.front();
 	}
 
+	virtual TType& bottom() override {
+		return m_Container.back();
+	}
+
+	virtual const TType& bottom() const override {
+		return m_Container.back();
+	}
+
 	virtual TType& get(size_t index) override {
 		return m_Container[index];
 	}
