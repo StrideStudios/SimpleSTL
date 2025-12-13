@@ -13,35 +13,35 @@ option(SIMPLESTL_TEST "Enable Testing SimpleSTL Features" ${PROJECT_IS_TOP_LEVEL
 
 add_library(SimpleSTL INTERFACE
         # Base Classes
-        include/simplestl/Pair.h
-        include/simplestl/Container.h
+        include/sstl/Pair.h
+        include/sstl/Container.h
 
         # Sequence Containers
-        include/simplestl/Vector.h
-        include/simplestl/Deque.h
-        include/simplestl/List.h
-        include/simplestl/ForwardList.h
-        include/simplestl/Array.h
+        include/sstl/Vector.h
+        include/sstl/Deque.h
+        include/sstl/List.h
+        include/sstl/ForwardList.h
+        include/sstl/Array.h
 
         # Sorted Sequence Containers
-        include/simplestl/MinHeap.h
-        include/simplestl/MaxHeap.h
+        include/sstl/MinHeap.h
+        include/sstl/MaxHeap.h
 
         # Container Adaptors
-        include/simplestl/Queue.h
-        include/simplestl/Stack.h
+        include/sstl/Queue.h
+        include/sstl/Stack.h
 
         # Associative Containers
-        include/simplestl/Set.h
-        include/simplestl/MultiSet.h
-        include/simplestl/Map.h
-        include/simplestl/MultiMap.h
+        include/sstl/Set.h
+        include/sstl/MultiSet.h
+        include/sstl/Map.h
+        include/sstl/MultiMap.h
 
         # Sorted Associative Containers
-        include/simplestl/PrioritySet.h
-        include/simplestl/PriorityMultiSet.h
-        include/simplestl/PriorityMap.h
-        include/simplestl/PriorityMultiMap.h
+        include/sstl/PrioritySet.h
+        include/sstl/PriorityMultiSet.h
+        include/sstl/PriorityMap.h
+        include/sstl/PriorityMultiMap.h
 )
 
 # If not overridden, STL CSS Standard is the same as parent
@@ -49,9 +49,9 @@ if(NOT SimpleSTL_CXX_STANDARD)
     set(SimpleSTL_CXX_STANDARD ${CMAKE_CXX_STANDARD})
 endif ()
 
-# If CXX Standard is not defined, fallback to c++17
+# If CXX Standard is not defined, fallback to c++20
 if(NOT SimpleSTL_CXX_STANDARD)
-    set(SimpleSTL_CXX_STANDARD 17)
+    set(SimpleSTL_CXX_STANDARD 20)
     message(WARNING "SimpleSTL: Could not find parent CXX Standard; Using default.")
 endif()
 
