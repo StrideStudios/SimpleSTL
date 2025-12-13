@@ -76,6 +76,10 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+	}
+
 	virtual void pop() override {
 		m_Container.erase(m_Container.begin());
 	}

@@ -113,6 +113,11 @@ struct TForwardList : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+		m_Size = 0;
+	}
+
 	virtual void pop() override {
 		m_Container.erase_after(m_Container.before_begin());
 		m_Size--;

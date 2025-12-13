@@ -115,6 +115,10 @@ struct TSequenceContainer {
 	virtual void replace(size_t index, TType&&)
 		GUARANTEED
 
+	// Removes all elements from the container
+	virtual void clear()
+		GUARANTEED
+
 	// Removes the topmost element from the container
 	virtual void pop()
 		GUARANTEED
@@ -196,6 +200,10 @@ struct TAssociativeContainer {
 	virtual void replace(const TKeyType& key, TValueType&& obj)
 		GUARANTEED
 
+	// Removes all elements from the container
+	virtual void clear()
+		GUARANTEED
+
 	// Removes the topmost element from the container
 	virtual void pop()
 		GUARANTEED
@@ -263,6 +271,10 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 	// Replaces a specified element with another element
 	virtual void replace(const TType&, TType&&)
+		GUARANTEED
+
+	// Removes all elements from the container
+	virtual void clear()
 		GUARANTEED
 
 	// Removes the topmost element from the container

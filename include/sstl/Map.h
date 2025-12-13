@@ -110,6 +110,10 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+	}
+
 	virtual void pop() override {
 		pop(m_Container.begin()->first);
 	}

@@ -84,6 +84,10 @@ struct TMaxHeap : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+	}
+
 	virtual void pop() override {
 		std::pop_heap(m_Container.begin(), m_Container.end(), std::less<TType>{});
 		m_Container.pop_back();

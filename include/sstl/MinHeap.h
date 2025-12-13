@@ -84,6 +84,10 @@ struct TMinHeap : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+	}
+
 	virtual void pop() override {
 		std::pop_heap(m_Container.begin(), m_Container.end(), MinCmp{});
 		m_Container.pop_back();

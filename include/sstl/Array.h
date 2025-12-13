@@ -7,7 +7,7 @@ template <typename TType, size_t TSize>
 struct TArray : TSequenceContainer<TType, TSize> {
 
 	TArray() {
-		m_IsPopulated.fill(false);
+		TArray::clear();
 	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
@@ -118,6 +118,11 @@ struct TArray : TSequenceContainer<TType, TSize> {
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
+	}
+
+	// Array is on stack, it is destroyed when out of scope
+	virtual void clear() override {
+		m_IsPopulated.fill(false);
 	}
 
 	virtual void pop() override {

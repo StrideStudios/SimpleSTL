@@ -106,6 +106,10 @@ struct TDeque : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void clear() override {
+		m_Container.clear();
+	}
+
 	virtual void pop() override {
 		pop(0);
 	}
