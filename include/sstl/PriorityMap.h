@@ -30,12 +30,6 @@ struct TPriorityMap : TAssociativeContainer<TKeyType, TValueType> {
 		return m_Container.at(key);
 	}
 
-	virtual void resize(const size_t amt) override {
-		for (size_t i = getSize(); i < amt; ++i) {
-			m_Container.emplace(static_cast<TKeyType>(i), TValueType());
-		}
-	}
-
 	virtual void resize(const size_t amt, std::function<void(TPair<TKeyType, TValueType>&)> func) override {
 		for (size_t i = getSize(); i < amt; ++i) {
 			TPair<TKeyType, TValueType> pair;

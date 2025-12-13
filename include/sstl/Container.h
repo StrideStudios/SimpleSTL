@@ -157,10 +157,6 @@ struct TAssociativeContainer {
 	virtual const TValueType& get(const TKeyType& key) const
 		GUARANTEED
 
-	// Fills container with n defaulted elements
-	virtual void resize(size_t amt)
-		GUARANTEED
-
 	// Fills container with TType& elements with size amt
 	virtual void resize(size_t amt, std::function<void(TPair<TKeyType, TValueType>&)> func)
 		GUARANTEED
