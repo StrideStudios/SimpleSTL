@@ -25,9 +25,9 @@ struct TUnique {
 	TUnique(TUnique<TOtherType>&) = delete;
 
 	template <typename TOtherType>
-	TUnique(TUnique<TOtherType>&& otr): m_ptr(std::move(otr.m_ptr)) {}
+	TUnique(TUnique<TOtherType>&& otr): m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TUnique(TUnique&& otr): m_ptr(std::move(otr.m_ptr)) {}
+	TUnique(TUnique&& otr): m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
@@ -52,12 +52,12 @@ struct TUnique {
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
 	TUnique& operator=(TUnique<TOtherType>&& otr) noexcept {
-		this->m_ptr = std::move(otr.m_ptr);
+		this->m_ptr = std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
 
 	TUnique& operator=(TUnique&& otr) noexcept {
-		this->m_ptr = std::move(otr.m_ptr);
+		this->m_ptr = std::forward<std::unique_ptr<TType>>(otr.m_ptr);
 		return *this;
 	}
 
@@ -136,9 +136,9 @@ struct TShared {
 	TShared(TShared<TOtherType>&) = delete;
 
 	template <typename TOtherType>
-	TShared(TShared<TOtherType>&& otr): m_ptr(std::move(otr.m_ptr)) {}
+	TShared(TShared<TOtherType>&& otr): m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TShared(TShared&& otr): m_ptr(std::move(otr.m_ptr)) {}
+	TShared(TShared&& otr): m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
@@ -163,12 +163,12 @@ struct TShared {
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
 	TShared& operator=(TShared<TOtherType>&& otr) noexcept {
-		this->m_ptr = std::move(otr.m_ptr);
+		this->m_ptr = std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
 
 	TShared& operator=(TShared&& otr) noexcept {
-		this->m_ptr = std::move(otr.m_ptr);
+		this->m_ptr = std::forward<std::shared_ptr<TType>>(otr.m_ptr);
 		return *this;
 	}
 
