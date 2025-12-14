@@ -5,18 +5,22 @@
 template <typename TType>
 struct TUnique {
 
-	TUnique(): m_ptr(std::make_unique<TType>()) {}
+	TUnique() noexcept
+	: m_ptr(std::make_unique<TType>()) {}
 
 	template <typename... TArgs>
-	TUnique(TArgs&&... args): m_ptr(std::make_unique<TType>(args...)) {}
+	TUnique(TArgs&&... args) noexcept
+	: m_ptr(std::make_unique<TType>(args...)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TUnique(const TOtherType& otr): m_ptr(std::make_unique<TOtherType>(otr)) {}
+	TUnique(const TOtherType& otr) noexcept
+	: m_ptr(std::make_unique<TOtherType>(otr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TUnique(TOtherType&& otr): m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
+	TUnique(TOtherType&& otr) noexcept
+	: m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType>
 	TUnique(const TUnique<TOtherType>&) = delete;
@@ -26,9 +30,11 @@ struct TUnique {
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TUnique(TUnique<TOtherType>&& otr): m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
+	TUnique(TUnique<TOtherType>&& otr) noexcept
+	: m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TUnique(TUnique&& otr): m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
+	TUnique(TUnique&& otr) noexcept
+	: m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
@@ -117,18 +123,22 @@ private:
 template <typename TType>
 struct TShared {
 
-	TShared(): m_ptr(std::make_shared<TType>()) {}
+	TShared() noexcept
+	: m_ptr(std::make_shared<TType>()) {}
 
 	template <typename... TArgs>
-	TShared(TArgs&&... args): m_ptr(std::make_shared<TType>(args...)) {}
+	TShared(TArgs&&... args) noexcept
+	: m_ptr(std::make_shared<TType>(args...)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TShared(const TOtherType& otr): m_ptr(std::make_shared<TOtherType>(otr)) {}
+	TShared(const TOtherType& otr) noexcept
+	: m_ptr(std::make_shared<TOtherType>(otr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TShared(TOtherType&& otr): m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
+	TShared(TOtherType&& otr) noexcept
+	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType>
 	TShared(const TShared<TOtherType>&) = delete;
@@ -138,9 +148,11 @@ struct TShared {
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>
-	TShared(TShared<TOtherType>&& otr): m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
+	TShared(TShared<TOtherType>&& otr) noexcept
+	: m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TShared(TShared&& otr): m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
+	TShared(TShared&& otr) noexcept
+	: m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
 	requires std::is_base_of_v<TType, TOtherType>

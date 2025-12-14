@@ -266,14 +266,14 @@ int main() {
 	DO_ARRAY_TEST(TArray)
 	DO_TEST(TStack)
 	DO_TEST(TQueue)
-	/*DO_TEST(TSet)
+	DO_TEST(TSet)
 	DO_TEST(TMultiSet)
 	DO_TEST(TPrioritySet)
 	DO_TEST(TPriorityMultiSet)
 	DO_MAP_TEST(TMap)
 	DO_MAP_TEST(TMultiMap)
 	DO_MAP_TEST(TPriorityMap)
-	DO_MAP_TEST(TPriorityMultiMap)*/
+	DO_MAP_TEST(TPriorityMultiMap)
 
 	return 0;
 }
