@@ -60,7 +60,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
+		if constexpr (std::is_copy_constructible_v<TType>) {
 			m_Container.emplace_back(obj);
 			return getSize() - 1;
 		} else {
@@ -69,7 +69,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
+		if constexpr (std::is_move_constructible_v<TType>) {
 			m_Container.emplace_back(std::move(obj));
 			return getSize() - 1;
 		} else {
@@ -78,7 +78,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
+		if constexpr (std::is_copy_constructible_v<TType>) {
 			m_Container.insert(m_Container.begin() + index, obj);
 		} else {
 			throw std::runtime_error("Type is not copyable!");
@@ -86,7 +86,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
+		if constexpr (std::is_move_constructible_v<TType>) {
 			m_Container.insert(m_Container.begin() + index, std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -94,7 +94,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
+		if constexpr (std::is_copy_constructible_v<TType>) {
 			pop(index);
 			push(index, obj);
 		} else {
@@ -103,7 +103,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
+		if constexpr (std::is_move_constructible_v<TType>) {
 			pop(index);
 			push(index, std::move(obj));
 		} else {

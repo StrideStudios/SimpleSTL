@@ -13,12 +13,16 @@ struct TUnique {
 	: m_ptr(std::make_unique<TType>(args...)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique(const TOtherType& otr) noexcept
 	: m_ptr(std::make_unique<TOtherType>(otr)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique(TOtherType&& otr) noexcept
 	: m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
 
@@ -29,7 +33,9 @@ struct TUnique {
 	TUnique(TUnique<TOtherType>&) = delete;
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique(TUnique<TOtherType>&& otr) noexcept
 	: m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
@@ -37,14 +43,18 @@ struct TUnique {
 	: m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique& operator=(const TOtherType& otr) noexcept {
 		this->m_ptr = std::make_unique<TOtherType>(otr);
 		return *this;
 	}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique& operator=(TOtherType&& otr) noexcept {
 		this->m_ptr = std::make_unique<TOtherType>(std::forward<TOtherType>(otr));
 		return *this;
@@ -57,7 +67,9 @@ struct TUnique {
 	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TUnique& operator=(TUnique<TOtherType>&& otr) noexcept {
 		this->m_ptr = std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
@@ -131,12 +143,16 @@ struct TShared {
 	: m_ptr(std::make_shared<TType>(args...)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared(const TOtherType& otr) noexcept
 	: m_ptr(std::make_shared<TOtherType>(otr)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared(TOtherType&& otr) noexcept
 	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
@@ -147,7 +163,9 @@ struct TShared {
 	TShared(TShared<TOtherType>&) = delete;
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared(TShared<TOtherType>&& otr) noexcept
 	: m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
@@ -155,14 +173,18 @@ struct TShared {
 	: m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared& operator=(const TOtherType& otr) noexcept {
 		this->m_ptr = std::make_shared<TOtherType>(otr);
 		return *this;
 	}
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared& operator=(TOtherType&& otr) noexcept {
 		this->m_ptr = std::make_shared<TOtherType>(std::forward<TOtherType>(otr));
 		return *this;
@@ -175,7 +197,9 @@ struct TShared {
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
 
 	template <typename TOtherType>
+#if CXX_VERSION >= 20
 	requires std::is_base_of_v<TType, TOtherType>
+#endif
 	TShared& operator=(TShared<TOtherType>&& otr) noexcept {
 		this->m_ptr = std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr);
 		return *this;

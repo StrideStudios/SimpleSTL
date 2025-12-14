@@ -106,7 +106,7 @@ container.forEachReverse([](index, obj) {
 
 ## Setup
 
-The bare minimum setup is C++11, though it is recommended to use at least C++17 for if constexpr.  The easiest method is to use git submodules, but copying into your project should work fine.
+The bare minimum setup is C++17, though it is recommended to use at least C++20 for requires.  The easiest method is to use git submodules, but copying into your project should work fine.
 
 ### Copying
 

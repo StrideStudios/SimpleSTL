@@ -1,7 +1,5 @@
-﻿#include <format>
-#include <iostream>
+﻿#include <iostream>
 #include <random>
-#include <utility>
 #include <cassert>
 
 #include "sstl/Array.h"
@@ -71,7 +69,9 @@ struct SObject : Parent{
 };
 
 template <typename TType, size_t TSize>
+#if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
 void containerTest(const std::string& containerName, TSequenceContainer<TType, TSize>& container) {
 
 	TType obj = SObject{100, "Hello"};
@@ -87,7 +87,7 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	std::ranges::shuffle(vec, rng);
+	RANGES(shuffle, vec, rng);
 
 	container.resize(10, [&](TType& object, const size_t index) {
 		object = SObject{vec[index], containerName};
@@ -96,18 +96,16 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 
 	const size_t size = container.getSize();
 	for (size_t i = 0; i < size; ++i) {
-		if constexpr (TUnfurled<TType>::isManaged) {
-			container.top()->print();
-		} else {
-			container.top().print();
-		}
+		getUnfurled(container.top())->print();
 		container.pop();
 	}
 	std::cout << std::endl;
 }
 
 template <typename TType>
+#if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
 void containerTest(const std::string& containerName, TSingleAssociativeContainer<TType>& container) {
 
 	TType obj = SObject{100, "Hello"};
@@ -123,7 +121,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	std::ranges::shuffle(vec, rng);
+	RANGES(shuffle, vec, rng);
 
 	size_t i = 0;
 
@@ -135,11 +133,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 
 	const size_t size = container.getSize();
 	for (size_t v = 0; v < size; ++v) {
-		if constexpr (TUnfurled<TType>::isManaged) {
-			container.top()->print();
-		} else {
-			container.top().print();
-		}
+		getUnfurled(container.top())->print();
 		container.pop();
 	}
 	std::cout << std::endl;
@@ -163,7 +157,9 @@ inline size_t getHash(const MapEnum& obj) {
 }
 
 template <typename TType>
+#if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
 void containerTest(const std::string& containerName, TAssociativeContainer<MapEnum, TType>& container) {
 
 	TType obj = SObject{100, "Hello"};
@@ -178,7 +174,7 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	std::ranges::shuffle(vec, rng);
+	RANGES(shuffle, vec, rng);
 
 	size_t i = 0;
 

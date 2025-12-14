@@ -3,14 +3,11 @@
 #include <functional>
 #include <stdexcept>
 
-#include "Memory.h"
-#include "Pair.h"
-
-#if CXX_VERSION >= 17
-#define IF_CONSTEXPR if constexpr
-#else
-#define IF_CONSTEXPR if
+#if CXX_VERSION >= 20
+#include <algorithm>
 #endif
+
+#include "Pair.h"
 
 #if CXX_VERSION >= 20
 #define ASSOCIATIVE_CONTAINS(c, x) c.contains(x)

@@ -23,7 +23,7 @@ struct TQueue : TDeque<TType> {
 	}
 
 	virtual size_t push(const TType& obj) override {
-		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
+		if constexpr (std::is_copy_constructible_v<TType>) {
 			TDeque<TType>::m_Container.emplace_back(obj);
 			return TDeque<TType>::getSize() - 1;
 		} else {
@@ -32,7 +32,7 @@ struct TQueue : TDeque<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
+		if constexpr (std::is_move_constructible_v<TType>) {
 			TDeque<TType>::m_Container.emplace_back(std::move(obj));
 			return TDeque<TType>::getSize() - 1;
 		} else {
@@ -41,7 +41,7 @@ struct TQueue : TDeque<TType> {
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
-		IF_CONSTEXPR (std::is_copy_constructible_v<TType>) {
+		if constexpr (std::is_copy_constructible_v<TType>) {
 			TDeque<TType>::pop(index);
 			TDeque<TType>::push(index, obj);
 		} else {
@@ -50,7 +50,7 @@ struct TQueue : TDeque<TType> {
 	}
 
 	virtual void replace(const size_t index, TType&& obj) override {
-		IF_CONSTEXPR (std::is_move_constructible_v<TType>) {
+		if constexpr (std::is_move_constructible_v<TType>) {
 			TDeque<TType>::pop(index);
 			TDeque<TType>::push(index, std::move(obj));
 		} else {

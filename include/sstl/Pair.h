@@ -13,28 +13,36 @@ struct TPair {
 	template <typename TOtherKeyType = TKeyType, typename TOtherValueType = TValueType,
 		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherKeyType>, std::is_copy_constructible<TOtherValueType>>, int> = 0
 	>
+#if CXX_VERSION >= 20
     constexpr explicit(!std::conjunction_v<std::is_convertible<const TOtherKeyType&, TOtherKeyType>, std::is_convertible<const TOtherValueType&, TOtherValueType>>)
+#endif
 	TPair(const std::pair<TKeyType, TValueType>& pair):
 	key(pair.first), value(pair.second) {}
 
 	template <typename TOtherKeyType = TKeyType, typename TOtherValueType = TValueType,
 		std::enable_if_t<std::conjunction_v<std::is_constructible<TKeyType, TOtherKeyType>, std::is_constructible<TValueType, TOtherValueType>>, int> = 0
 	>
+#if CXX_VERSION >= 20
     constexpr explicit(!std::conjunction_v<std::is_convertible<TOtherKeyType, TKeyType>, std::is_convertible<TOtherValueType, TValueType>>)
+#endif
 	TPair(std::pair<TOtherKeyType, TOtherValueType>&& pair):
 	key(std::forward<TOtherKeyType>(pair.first)), value(std::forward<TOtherValueType>(pair.second)) {}
 
 	template <typename TOtherKeyType = TKeyType, typename TOtherValueType = TValueType,
 		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherKeyType>, std::is_copy_constructible<TOtherValueType>>, int> = 0
 	>
+#if CXX_VERSION >= 20
     constexpr explicit(!std::conjunction_v<std::is_convertible<const TOtherKeyType&, TOtherKeyType>, std::is_convertible<const TOtherValueType&, TOtherValueType>>)
+#endif
 	TPair(const TOtherKeyType& key, const TOtherValueType& value):
 	key(key), value(value) {}
 
 	template <typename TOtherKeyType = TKeyType, typename TOtherValueType = TValueType,
 		std::enable_if_t<std::conjunction_v<std::is_constructible<TKeyType, TOtherKeyType>, std::is_constructible<TValueType, TOtherValueType>>, int> = 0
 	>
+#if CXX_VERSION >= 20
     constexpr explicit(!std::conjunction_v<std::is_convertible<TOtherKeyType, TKeyType>, std::is_convertible<TOtherValueType, TValueType>>)
+#endif
 	TPair(TOtherKeyType&& key, TOtherValueType&& value):
 	key(std::forward<TOtherKeyType>(key)), value(std::forward<TOtherValueType>(value)) {}
 
