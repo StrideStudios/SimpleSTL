@@ -92,7 +92,7 @@ struct TSet : TSingleAssociativeContainer<TType> {
 		m_Container.erase(obj);
 	}
 
-	virtual void forEach(const std::function<void(const TType&)>& func) override {
+	virtual void forEach(const std::function<void(const TType&)>& func) const override {
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); ++itr) {
 			func(*itr);
 		}

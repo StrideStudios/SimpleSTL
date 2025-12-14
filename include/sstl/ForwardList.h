@@ -142,6 +142,13 @@ struct TForwardList : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void forEach(const std::function<void(size_t, const TType&)>& func) const override {
+		size_t i = 0;
+		for (auto itr = m_Container.begin(); itr != m_Container.end(); std::advance(itr, 1), ++i) {
+			func(i, *itr);
+		}
+	}
+
 protected:
 
 	std::forward_list<TType> m_Container;

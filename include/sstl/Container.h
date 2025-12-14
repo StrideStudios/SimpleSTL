@@ -129,8 +129,15 @@ struct TSequenceContainer {
 	// Iterates through each element
 	virtual void forEach(const std::function<void(size_t, TType&)>& func)
 		GUARANTEED
+	// Iterates through each element, const version
+	virtual void forEach(const std::function<void(size_t, const TType&)>& func) const
+		GUARANTEED
+
 	// Iterates through each element in reverse, not guaranteed because some containers cannot be iterated both ways, such as forward_list
 	virtual void forEachReverse(const std::function<void(size_t, TType&)>& func)
+		NOT_GUARANTEED
+	// Iterates through each element in reverse, const version
+	virtual void forEachReverse(const std::function<void(size_t, const TType&)>& func) const
 		NOT_GUARANTEED
 };
 
@@ -208,7 +215,7 @@ struct TAssociativeContainer {
 		GUARANTEED
 
 	// Iterates through each element (Maps do not support reverse iteration)
-	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func)
+	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func) const
 		GUARANTEED
 };
 
@@ -280,9 +287,6 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 
 	// Iterates through each element
-	virtual void forEach(const std::function<void(const TType&)>& func)
+	virtual void forEach(const std::function<void(const TType&)>& func) const
 		GUARANTEED
-	// Iterates through each element in reverse, not guaranteed because some containers cannot be iterated both ways, such as forward_list
-	virtual void forEachReverse(const std::function<void(const TType&)>& func)
-		NOT_GUARANTEED
 };

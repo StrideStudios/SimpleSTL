@@ -66,7 +66,21 @@ struct TStack : TDeque<TType> {
 		}
 	}
 
+	virtual void forEach(const std::function<void(size_t, const TType&)>& func) const override {
+		size_t i = 0;
+		for (auto itr = TDeque<TType>::m_Container.begin(); itr != TDeque<TType>::m_Container.end(); ++itr, ++i) {
+			func(i, *itr);
+		}
+	}
+
 	virtual void forEachReverse(const std::function<void(size_t, TType&)>& func) override {
+		size_t i = TDeque<TType>::getSize() - 1;
+		for (auto itr = TDeque<TType>::m_Container.rbegin(); itr != TDeque<TType>::m_Container.rend(); ++itr, --i) {
+			func(i, *itr);
+		}
+	}
+
+	virtual void forEachReverse(const std::function<void(size_t, const TType&)>& func) const override {
 		size_t i = TDeque<TType>::getSize() - 1;
 		for (auto itr = TDeque<TType>::m_Container.rbegin(); itr != TDeque<TType>::m_Container.rend(); ++itr, --i) {
 			func(i, *itr);

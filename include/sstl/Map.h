@@ -116,7 +116,7 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 		m_Container.erase(key);
 	}
 
-	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func) override {
+	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func) const override {
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); ++itr) {
 			func(TPair<TKeyType, const TValueType&>{itr->first, itr->second});
 		}

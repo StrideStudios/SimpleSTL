@@ -140,7 +140,21 @@ struct TList : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void forEach(const std::function<void(size_t, const TType&)>& func) const override {
+		size_t i = 0;
+		for (auto itr = m_Container.begin(); itr != m_Container.end(); std::advance(itr, 1), ++i) {
+			func(i, *itr);
+		}
+	}
+
 	virtual void forEachReverse(const std::function<void(size_t, TType&)>& func) override {
+		size_t i = getSize() - 1;
+		for (auto itr = m_Container.rbegin(); itr != m_Container.rend(); std::advance(itr, 1), --i) {
+			func(i, *itr);
+		}
+	}
+
+	virtual void forEachReverse(const std::function<void(size_t, const TType&)>& func) const override {
 		size_t i = getSize() - 1;
 		for (auto itr = m_Container.rbegin(); itr != m_Container.rend(); std::advance(itr, 1), --i) {
 			func(i, *itr);
