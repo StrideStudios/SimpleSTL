@@ -157,10 +157,12 @@ struct TShared {
 	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType>
-	TShared(const TShared<TOtherType>&) = delete;
+	TShared(const TShared<TOtherType>& otr) noexcept
+	: m_ptr(otr.m_ptr) {}
 
 	template <typename TOtherType>
-	TShared(TShared<TOtherType>&) = delete;
+	TShared(TShared<TOtherType>& otr) noexcept
+	: m_ptr(otr.m_ptr) {}
 
 	template <typename TOtherType>
 #if CXX_VERSION >= 20
@@ -191,10 +193,16 @@ struct TShared {
 	}
 
 	template <typename TOtherType>
-	TShared& operator=(const TShared<TOtherType>& otr) = delete;
+	TShared& operator=(const TShared<TOtherType>& otr) noexcept {
+		this->m_ptr = otr.m_ptr;
+		return *this;
+	}
 
 	template <typename TOtherType>
-	TShared& operator=(TShared<TOtherType>& otr) = delete;
+	TShared& operator=(TShared<TOtherType>& otr) noexcept {
+		this->m_ptr = otr.m_ptr;
+		return *this;
+	}
 
 	template <typename TOtherType>
 #if CXX_VERSION >= 20
