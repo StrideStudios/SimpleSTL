@@ -5,6 +5,9 @@
 template <typename TType>
 struct TUnique {
 
+	TUnique(std::unique_ptr<TType>&& ptr) noexcept
+	: m_ptr(std::forward<std::unique_ptr<TType>>(ptr)) {}
+
 	TUnique() noexcept
 	: m_ptr(std::make_unique<TType>()) {}
 
@@ -135,6 +138,12 @@ private:
 template <typename TType>
 struct TShared {
 
+	TShared(const std::shared_ptr<TType>& ptr) noexcept
+	: m_ptr(ptr) {}
+
+	TShared(std::shared_ptr<TType>&& ptr) noexcept
+	: m_ptr(std::forward<std::shared_ptr<TType>>(ptr)) {}
+
 	TShared() noexcept
 	: m_ptr(std::make_shared<TType>()) {}
 
@@ -157,11 +166,15 @@ struct TShared {
 	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType>
-	TShared(const TShared<TOtherType>& otr) noexcept
-	: m_ptr(otr.m_ptr) {}
+	TShared(const TShared<TOtherType>& otr) = delete;
 
 	template <typename TOtherType>
-	TShared(TShared<TOtherType>& otr) noexcept
+	TShared(TShared<TOtherType>& otr) = delete;
+
+	TShared(const TShared& otr) noexcept
+	: m_ptr(otr.m_ptr) {}
+
+	TShared(TShared& otr) noexcept
 	: m_ptr(otr.m_ptr) {}
 
 	template <typename TOtherType>
@@ -193,13 +206,17 @@ struct TShared {
 	}
 
 	template <typename TOtherType>
-	TShared& operator=(const TShared<TOtherType>& otr) noexcept {
+	TShared& operator=(const TShared<TOtherType>& otr) = delete;
+
+	template <typename TOtherType>
+	TShared& operator=(TShared<TOtherType>& otr) = delete;
+
+	TShared& operator=(const TShared& otr) noexcept {
 		this->m_ptr = otr.m_ptr;
 		return *this;
 	}
 
-	template <typename TOtherType>
-	TShared& operator=(TShared<TOtherType>& otr) noexcept {
+	TShared& operator=(TShared& otr) noexcept {
 		this->m_ptr = otr.m_ptr;
 		return *this;
 	}
@@ -216,6 +233,26 @@ struct TShared {
 	TShared& operator=(TShared&& otr) noexcept {
 		this->m_ptr = std::forward<std::shared_ptr<TType>>(otr.m_ptr);
 		return *this;
+	}
+
+	template <typename TOtherType>
+	TShared<TOtherType> staticCast() const {
+		return TShared<TOtherType>{std::static_pointer_cast<TOtherType, TType>(this->m_ptr)};
+	}
+
+	template <typename TOtherType>
+	TShared<TOtherType> dynamicCast() const {
+		return TShared<TOtherType>{std::dynamic_pointer_cast<TOtherType, TType>(this->m_ptr)};
+	}
+
+	template <typename TOtherType>
+	TShared<TOtherType> reinterpretCast() const {
+		return TShared<TOtherType>{std::reinterpret_pointer_cast<TOtherType, TType>(this->m_ptr)};
+	}
+
+	template <typename TOtherType>
+	TShared<TOtherType> constCast() const {
+		return TShared<TOtherType>{std::const_pointer_cast<TOtherType, TType>(this->m_ptr)};
 	}
 
 	TType* operator->() const {
@@ -268,9 +305,6 @@ private:
 	friend struct TShared;
 
 	std::shared_ptr<TType> m_ptr;
-
-	TShared(const TShared&) = delete;
-	TShared& operator=(const TShared&) = delete;
 
 };
 

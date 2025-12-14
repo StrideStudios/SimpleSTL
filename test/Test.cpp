@@ -253,6 +253,19 @@ int main() {
 
 	parent->print();
 
+	{
+		TShared<SObject> obb = {100, "Hello2"};
+		TShared<Parent> obb2 = obb.staticCast<Parent>();
+		obb2->print();
+	}
+
+	{
+		TShared<SObject> obb = {100, "Hello3"};
+		TShared<Parent> obb2 = obb.staticCast<Parent>();
+		TShared<SObject> obb3 = obb2.dynamicCast<SObject>();
+		obb3->print();
+	}
+
 	DO_TEST(TVector)
 	DO_TEST(TMaxHeap)
 	DO_TEST(TMinHeap)
