@@ -11,6 +11,8 @@ struct TUnique {
 	TUnique() noexcept
 	: m_ptr(std::make_unique<TType>()) {}
 
+	TUnique(nullptr_t) noexcept {}
+
 	template <typename... TArgs>
 	TUnique(TArgs&&... args) noexcept
 	: m_ptr(std::make_unique<TType>(args...)) {}
@@ -131,7 +133,7 @@ private:
 	template <typename>
 	friend struct TUnique;
 
-	std::unique_ptr<TType> m_ptr;
+	std::unique_ptr<TType> m_ptr = nullptr;
 
 };
 
@@ -146,6 +148,8 @@ struct TShared {
 
 	TShared() noexcept
 	: m_ptr(std::make_shared<TType>()) {}
+
+	TShared(nullptr_t) noexcept {}
 
 	template <typename... TArgs>
 	TShared(TArgs&&... args) noexcept
@@ -304,7 +308,7 @@ private:
 	template <typename>
 	friend struct TShared;
 
-	std::shared_ptr<TType> m_ptr;
+	std::shared_ptr<TType> m_ptr = nullptr;
 
 };
 
