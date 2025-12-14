@@ -13,12 +13,18 @@
 #endif
 
 #if CXX_VERSION >= 20
-#define FIND(c, x) std::ranges::find(c, x) != c.end();
-#define CONTAINS(c, x) c.contains(x);
+#define ASSOCIATIVE_CONTAINS(c, x) c.contains(x)
+#define RANGES(func, c, x) std::ranges::func(c, x)
+#define REMOVE_RANGES(c, x) RANGES(remove, c, x).begin()
 #else
-#define FIND(c, x) std::find(c.begin(), c.end(), x) != c.end();
-#define CONTAINS(c, x) c.find(x) != c.end();
+#define ASSOCIATIVE_CONTAINS(c, x) c.find(x) != c.end()
+#define RANGES(func, c, x) std::func(c.begin(), c.end(), x)
+#define REMOVE_RANGES(c, x) RANGES(remove, c, x)
 #endif
+
+#define FIND(c, x) RANGES(find, c, x)
+#define CONTAINS(c, x) FIND(c, x) != c.end()
+#define ERASE(c, x) c.erase(REMOVE_RANGES(c, x), c.end())
 
 // Makes it easy to see if a function is guaranteed or not
 #define GUARANTEED = 0;
@@ -119,6 +125,9 @@ struct TSequenceContainer {
 	// Removes an element at the specified index
 	virtual void pop(size_t index)
 		GUARANTEED
+	// Removes a certain object from the container
+	virtual void pop(const TType& obj)
+		GUARANTEED
 
 	// Iterates through each element
 	virtual void forEach(const std::function<void(size_t, TType&)>& func)
@@ -197,7 +206,6 @@ struct TAssociativeContainer {
 	// Removes the topmost element from the container
 	virtual void pop()
 		GUARANTEED
-
 	// Removes an element at key from the container
 	virtual void pop(const TKeyType& key)
 		GUARANTEED

@@ -29,7 +29,7 @@ struct TMinHeap : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return FIND(m_Container, obj);
+		return CONTAINS(m_Container, obj);
 	}
 
 	virtual TType& get(size_t index) override {
@@ -91,6 +91,10 @@ struct TMinHeap : TSequenceContainer<TType> {
 	virtual void pop() override {
 		std::pop_heap(m_Container.begin(), m_Container.end(), MinCmp{});
 		m_Container.pop_back();
+	}
+
+	virtual void pop(const TType& obj) override {
+		ERASE(m_Container, obj);
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {

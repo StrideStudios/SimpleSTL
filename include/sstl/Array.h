@@ -35,7 +35,7 @@ struct TArray : TSequenceContainer<TType, TSize> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return FIND(m_Container, obj);
+		return CONTAINS(m_Container, obj);
 	}
 
 	virtual TType& get(size_t index) override {
@@ -143,6 +143,14 @@ struct TArray : TSequenceContainer<TType, TSize> {
 			return;
 		}
 		throw std::runtime_error("No element at index to be popped!");
+	}
+
+	virtual void pop(const TType& obj) override {
+		forEach([&](size_t index, TType& otr) {
+			if (obj == otr) {
+				m_IsPopulated[index] = false;
+			}
+		});
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {

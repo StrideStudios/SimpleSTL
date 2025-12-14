@@ -19,7 +19,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return FIND(m_Container, obj);
+		return CONTAINS(m_Container, obj);
 	}
 
 	virtual TType& get(size_t index) override {
@@ -127,6 +127,11 @@ struct TForwardList : TSequenceContainer<TType> {
 		auto itr = m_Container.before_begin();
 		std::advance(itr, index);
 		m_Container.erase_after(itr);
+		m_Size--;
+	}
+
+	virtual void pop(const TType& obj) override {
+		m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
 		m_Size--;
 	}
 

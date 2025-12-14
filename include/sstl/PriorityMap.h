@@ -19,7 +19,7 @@ struct TPriorityMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual bool contains(const TKeyType& key) const override {
-		return CONTAINS(m_Container, key);
+		return ASSOCIATIVE_CONTAINS(m_Container, key);
 	}
 
 	virtual TValueType& get(const TKeyType& key) override {

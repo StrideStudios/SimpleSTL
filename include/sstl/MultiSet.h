@@ -19,7 +19,7 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return CONTAINS(m_Container, obj);
+		return ASSOCIATIVE_CONTAINS(m_Container, obj);
 	}
 
 	virtual void resize(const size_t amt) override {

@@ -27,7 +27,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return FIND(m_Container, obj);
+		return CONTAINS(m_Container, obj);
 	}
 
 	virtual TType& get(size_t index) override {
@@ -121,6 +121,10 @@ struct TVector : TSequenceContainer<TType> {
 
 	virtual void pop(const size_t index) override {
 		m_Container.erase(m_Container.begin() + index);
+	}
+
+	virtual void pop(const TType& obj) override {
+		ERASE(m_Container, obj);
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {
