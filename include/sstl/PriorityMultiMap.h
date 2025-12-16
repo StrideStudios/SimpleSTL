@@ -112,6 +112,16 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 		m_Container.erase(key);
 	}
 
+	virtual void transfer(TAssociativeContainer<TKeyType, TValueType>& otr, const TKeyType& key) override {
+		auto itr = m_Container.extract(m_Container.find(key));
+		// Prefer move, but copy if not available
+		if constexpr (std::is_move_constructible_v<TValueType>) {
+			otr.push(itr.key(), std::move(itr.mapped()));
+		} else {
+			otr.push(itr.key(), itr.mapped());
+		}
+	}
+
 	virtual void forEach(const std::function<void(TPair<TKeyType, const TValueType&>)>& func) const override {
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); ++itr) {
 			func(TPair<TKeyType, const TValueType&>{itr->first, itr->second});

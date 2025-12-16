@@ -100,6 +100,73 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 		container.pop();
 	}
 	std::cout << std::endl;
+
+	container.clear();
+
+}
+
+
+template <typename TType, size_t TSize>
+#if CXX_VERSION >= 20
+requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
+void transferTest(const std::string& containerName, TSequenceContainer<TType, TSize>& container) {
+
+	{
+		std::cout << "Vector Transfer Test" << std::endl;
+
+		TVector<TType> from;
+		from.push(SObject{100, containerName});
+
+		std::cout << "Pre Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+
+		assert(from.getSize() == 1);
+
+		from.transfer(container, 0);
+
+		std::cout << "Post Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << std::endl;
+
+		assert(container.getSize() == 1);
+
+		container.clear();
+	}
+
+	{
+		std::cout << "List Transfer Test" << std::endl;
+
+		TList<TType> from;
+		from.push(SObject{100, containerName});
+
+		std::cout << "Pre Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+
+		assert(from.getSize() == 1);
+
+		from.transfer(container, 0);
+
+		std::cout << "Post Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << std::endl;
+
+		assert(container.getSize() == 1);
+
+		container.clear();
+	}
 }
 
 template <typename TType>
@@ -139,6 +206,41 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	std::cout << std::endl;
 }
 
+template <typename TType>
+#if CXX_VERSION >= 20
+requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
+void transferTest(const std::string& containerName, TSingleAssociativeContainer<TType>& container) {
+
+	{
+		std::cout << "Set Transfer Test" << std::endl;
+
+		TSet<TType> from;
+		from.push(SObject{100, containerName});
+
+		std::cout << "Pre Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+
+		assert(from.getSize() == 1);
+
+		from.transfer(container, const_cast<TType&>(from.top()));
+
+		std::cout << "Post Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << "to:" << std::endl;
+		container.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		std::cout << std::endl;
+
+		assert(container.getSize() == 1);
+
+		container.clear();
+	}
+}
+
 enum class MapEnum : uint8_t {
 	NONE,
 	ONE,
@@ -154,6 +256,32 @@ enum class MapEnum : uint8_t {
 
 inline size_t getHash(const MapEnum& obj) {
 	return (size_t)obj;
+}
+
+std::string enumToString(const MapEnum val) {
+	switch (val) {
+		case MapEnum::NONE:
+			return "NONE";
+		case MapEnum::ONE:
+			return "ONE";
+		case MapEnum::TWO:
+			return "TWO";
+		case MapEnum::THREE:
+			return "THREE";
+		case MapEnum::FOUR:
+			return "FOUR";
+		case MapEnum::FIVE:
+			return "FIVE";
+		case MapEnum::SIX:
+			return "SIX";
+		case MapEnum::SEVEN:
+			return "SEVEN";
+		case MapEnum::EIGHT:
+			return "EIGHT";
+		case MapEnum::NINE:
+			return "NINE";
+	}
+	return "";
 }
 
 template <typename TType>
@@ -184,37 +312,11 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	});
 	assert(container.getSize() == 10);
 
-	auto EnumToString = [](const MapEnum val) {
-		switch (val) {
-			case MapEnum::NONE:
-				return "NONE";
-			case MapEnum::ONE:
-				return "ONE";
-			case MapEnum::TWO:
-				return "TWO";
-			case MapEnum::THREE:
-				return "THREE";
-			case MapEnum::FOUR:
-				return "FOUR";
-			case MapEnum::FIVE:
-				return "FIVE";
-			case MapEnum::SIX:
-				return "SIX";
-			case MapEnum::SEVEN:
-				return "SEVEN";
-			case MapEnum::EIGHT:
-				return "EIGHT";
-			case MapEnum::NINE:
-				return "NINE";
-		}
-		return "";
-	};
-
 	const size_t size = container.getSize();
 	for (size_t v = 0; v < size; ++v) {
 		MapEnum enm = (MapEnum)v;
 		if (auto object = getUnfurled(container.get(enm))) {
-			std::cout << "Key: " << EnumToString(enm) << " ";
+			std::cout << "Key: " << enumToString(enm) << " ";
 			object->print();
 			container.pop(enm);
 		}
@@ -223,20 +325,72 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	std::cout << std::endl;
 }
 
+template <typename TType>
+#if CXX_VERSION >= 20
+requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+#endif
+void transferTest(const std::string& containerName, TAssociativeContainer<MapEnum, TType>& container) {
+
+	{
+		std::cout << "Map Transfer Test" << std::endl;
+
+		TMap<MapEnum, TType> from;
+		from.push(MapEnum::NONE, SObject{100, containerName});
+
+		std::cout << "Pre Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
+			std::cout << "Key: " << enumToString(obb.key) << " ";
+			getUnfurled(obb.value)->print();
+		});
+		std::cout << "to:" << std::endl;
+		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
+			std::cout << "Key: " << enumToString(obb.key) << " ";
+			getUnfurled(obb.value)->print();
+		});
+
+		assert(from.getSize() == 1);
+
+		from.transfer(container, MapEnum::NONE);
+
+		std::cout << "Post Transfer" << std::endl;
+		std::cout << "from:" << std::endl;
+		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
+			std::cout << "Key: " << enumToString(obb.key) << " ";
+			getUnfurled(obb.value)->print();
+		});
+		std::cout << "to:" << std::endl;
+		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
+			std::cout << "Key: " << enumToString(obb.key) << " ";
+			getUnfurled(obb.value)->print();
+		});
+		std::cout << std::endl;
+
+		assert(container.getSize() == 1);
+
+		container.clear();
+	}
+}
+
 #define DO_TEST(x) \
-	{ x<Parent> container; containerTest(#x, container); } \
-	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); }
+	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
+	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
+	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
 
 #define DO_ARRAY_TEST(x) \
 	{ x<Parent, 10> container; containerTest(#x, container); } \
 	{ x<TShared<Parent>, 10> container; containerTest(#x " Shared", container); } \
 	{ x<TUnique<Parent>, 10> container; containerTest(#x " Unique", container); }
 
+#define DO_ASSOCIATIVE_TEST(x) \
+	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
+	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
+	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
+
 #define DO_MAP_TEST(x) \
-	{ x<MapEnum, Parent> container; containerTest(#x, container); } \
-	{ x<MapEnum, TShared<Parent>> container; containerTest(#x " Shared", container); } \
-	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); }
+	{ x<MapEnum, Parent> container; containerTest(#x, container); transferTest(#x, container); } \
+	{ x<MapEnum, TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
+	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
 
 int main() {
 
@@ -266,6 +420,24 @@ int main() {
 		obb3->print();
 	}
 
+	/*{
+		TList<TUnique<SObject>> l1;
+		TVector<TUnique<SObject>> l2;
+		l1.push(SObject{5015, "List 1"});
+		l2.push(SObject{5016, "Vector 2"});
+		std::cout << "Pre Splice" << std::endl;
+		std::cout << "L1:" << std::endl;
+		l1.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
+		std::cout << "L2:" << std::endl;
+		l2.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
+		std::cout << "Post Splice" << std::endl;
+		l1.transfer(l2, 0);
+		std::cout << "L1:" << std::endl;
+		l1.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
+		std::cout << "L2:" << std::endl;
+		l2.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
+	}*/
+
 	DO_TEST(TVector)
 	DO_TEST(TMaxHeap)
 	DO_TEST(TMinHeap)
@@ -275,10 +447,10 @@ int main() {
 	DO_ARRAY_TEST(TArray)
 	DO_TEST(TStack)
 	DO_TEST(TQueue)
-	DO_TEST(TSet)
-	DO_TEST(TMultiSet)
-	DO_TEST(TPrioritySet)
-	DO_TEST(TPriorityMultiSet)
+	DO_ASSOCIATIVE_TEST(TSet)
+	DO_ASSOCIATIVE_TEST(TMultiSet)
+	DO_ASSOCIATIVE_TEST(TPrioritySet)
+	DO_ASSOCIATIVE_TEST(TPriorityMultiSet)
 	DO_MAP_TEST(TMap)
 	DO_MAP_TEST(TMultiMap)
 	DO_MAP_TEST(TPriorityMap)

@@ -135,6 +135,17 @@ struct TForwardList : TSequenceContainer<TType> {
 		m_Size--;
 	}
 
+	virtual void transfer(TSequenceContainer<TType>& otr, const size_t index) override {
+		// Forward List transfer can use splicing
+		if (auto otrList = dynamic_cast<TForwardList*>(&otr)) {
+			auto itr = m_Container.before_begin();
+			std::advance(itr, index);
+			otrList->m_Container.splice_after(otrList->m_Container.before_begin(), m_Container, itr);
+			return;
+		}
+		TSequenceContainer<TType>::transfer(otr, index);
+	}
+
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {
 		size_t i = 0;
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); std::advance(itr, 1), ++i) {

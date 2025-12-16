@@ -133,6 +133,17 @@ struct TList : TSequenceContainer<TType> {
 		ERASE(m_Container, obj);
 	}
 
+	// List transfer can use splicing
+	virtual void transfer(TSequenceContainer<TType>& otr, const size_t index) override {
+		if (auto otrList = dynamic_cast<TList*>(&otr)) {
+			auto itr = m_Container.begin();
+			std::advance(itr, index);
+			otrList->m_Container.splice(otrList->m_Container.begin(), m_Container, itr);
+			return;
+		}
+		TSequenceContainer<TType>::transfer(otr, index);
+	}
+
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {
 		size_t i = 0;
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); std::advance(itr, 1), ++i) {

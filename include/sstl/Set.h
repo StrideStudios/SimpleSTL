@@ -92,6 +92,17 @@ struct TSet : TSingleAssociativeContainer<TType> {
 		m_Container.erase(obj);
 	}
 
+	virtual void transfer(TSingleAssociativeContainer<TType>& otr, TType& obj) override {
+		if (!this->contains(obj)) return;
+		auto itr = m_Container.extract(m_Container.find(obj));
+		// Prefer move, but copy if not available
+		if constexpr (std::is_move_constructible_v<TType>) {
+			otr.push(std::move(itr.value()));
+		} else {
+			otr.push(itr.value());
+		}
+	}
+
 	virtual void forEach(const std::function<void(const TType&)>& func) const override {
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); ++itr) {
 			func(*itr);

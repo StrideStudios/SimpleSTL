@@ -126,6 +126,18 @@ struct TSequenceContainer {
 	virtual void pop(const TType& obj)
 		GUARANTEED
 
+	// Moves an object at index from this to container otr
+	virtual void transfer(TSequenceContainer& otr, const size_t index) {
+		// Prefer move, but copy if not available
+		auto& obj = get(index);
+		if constexpr (std::is_move_constructible_v<TType>) {
+			otr.push(std::move(obj));
+		} else {
+			otr.push(obj);
+		}
+		pop(index);
+	}
+
 	// Iterates through each element
 	virtual void forEach(const std::function<void(size_t, TType&)>& func)
 		GUARANTEED
@@ -142,7 +154,7 @@ struct TSequenceContainer {
 };
 
 // Designed to be a container with a key for indexing
-template <typename TKeyType, typename TValueType = TKeyType>
+template <typename TKeyType, typename TValueType>
 struct TAssociativeContainer {
 
 	virtual ~TAssociativeContainer() = default;
@@ -212,6 +224,10 @@ struct TAssociativeContainer {
 		GUARANTEED
 	// Removes an element at key from the container
 	virtual void pop(const TKeyType& key)
+		GUARANTEED
+
+	// Moves an object at key from this to container otr
+	virtual void transfer(TAssociativeContainer& otr, const TKeyType& key)
 		GUARANTEED
 
 	// Iterates through each element (Maps do not support reverse iteration)
@@ -284,6 +300,11 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 	// Removes an element from the container
 	virtual void pop(const TType&)
+		GUARANTEED
+
+	// Moves an object from this to container otr
+	// Has to be overridden due to object lifetimes and extraction
+	virtual void transfer(TSingleAssociativeContainer& otr, TType& obj)
 		GUARANTEED
 
 	// Iterates through each element
