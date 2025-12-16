@@ -98,7 +98,7 @@ struct TUnique {
 	const TType* get() const { return m_ptr.get(); }
 
 	operator bool() const {
-		return get() != nullptr;
+		return static_cast<bool>(m_ptr);
 	}
 
 	friend bool operator<(const TUnique& fst, const TUnique& snd) {
@@ -272,7 +272,7 @@ struct TShared {
 	const TType* get() const { return m_ptr.get(); }
 
 	operator bool() const {
-		return get() != nullptr;
+		return static_cast<bool>(m_ptr);
 	}
 
 	friend bool operator<(const TShared& fst, const TShared& snd) {
