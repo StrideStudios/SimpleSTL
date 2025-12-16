@@ -8,8 +8,7 @@ struct TUnique {
 	TUnique(std::unique_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::unique_ptr<TType>>(ptr)) {}
 
-	TUnique() noexcept
-	: m_ptr(std::make_unique<TType>()) {}
+	TUnique() noexcept {}
 
 	TUnique(nullptr_t) noexcept {}
 
@@ -146,8 +145,7 @@ struct TShared {
 	TShared(std::shared_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::shared_ptr<TType>>(ptr)) {}
 
-	TShared() noexcept
-	: m_ptr(std::make_shared<TType>()) {}
+	TShared() noexcept {}
 
 	TShared(nullptr_t) noexcept {}
 
