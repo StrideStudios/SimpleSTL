@@ -22,6 +22,10 @@ struct TForwardList : TSequenceContainer<TType> {
 		return CONTAINS(m_Container, obj);
 	}
 
+	virtual size_t find(const TType& obj) const override {
+		return DISTANCE(m_Container, obj);
+	}
+
 	virtual TType& get(size_t index) override {
 		auto itr = m_Container.begin();
 		std::advance(itr, index);

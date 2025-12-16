@@ -32,6 +32,10 @@ struct TMaxHeap : TSequenceContainer<TType> {
 		return CONTAINS(m_Container, obj);
 	}
 
+	virtual size_t find(const TType& obj) const override {
+		return DISTANCE(m_Container, obj);
+	}
+
 	virtual TType& get(size_t index) override {
 		return m_Container[index];
 	}

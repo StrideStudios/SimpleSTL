@@ -77,7 +77,12 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 	TType obj = SObject{100, "Hello"};
 	TType obj2 = SObject{100, "Hello"};
 	container.push(std::move(obj));
-	std::cout << "Container " << containerName << (container.contains(obj2) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
+	auto& point = container.top();
+	std::cout << "Container " << containerName << (container.contains(point) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
+	if (container.contains(point))
+		std::cout << "At Index: " << container.find(point) << std::endl;
+
+	assert(container.find(point) == 0);
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {
@@ -178,7 +183,8 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	TType obj = SObject{100, "Hello"};
 	TType obj2 = SObject{100, "Hello"};
 	container.push(std::move(obj));
-	std::cout << "Container " << containerName << (container.contains(obj2) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
+	auto& point = container.top();
+	std::cout << "Container " << containerName << (container.contains(point) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {

@@ -20,6 +20,7 @@
 #endif
 
 #define FIND(c, x) RANGES(find, c, x)
+#define DISTANCE(c, x) RANGES(distance, c.begin(), FIND(c, x))
 #define CONTAINS(c, x) FIND(c, x) != c.end()
 #define ERASE(c, x) c.erase(REMOVE_RANGES(c, x), c.end())
 
@@ -59,6 +60,10 @@ struct TSequenceContainer {
 
 	// Checks if a certain object is contained within the container
 	virtual bool contains(const TType& obj) const
+		GUARANTEED
+
+	// Find a certain element in the container
+	virtual size_t find(const TType& obj) const
 		GUARANTEED
 
 	// Get an element at a specified index
