@@ -85,6 +85,26 @@ struct TUnique {
 		return *this;
 	}
 
+	template <typename TOtherType>
+	TOtherType* staticCast() const {
+		return static_cast<TOtherType*>(this->m_ptr.get());
+	}
+
+	template <typename TOtherType>
+	TOtherType* dynamicCast() const {
+		return dynamic_cast<TOtherType*>(this->m_ptr.get());
+	}
+
+	template <typename TOtherType>
+	TOtherType* reinterpretCast() const {
+		return reinterpret_cast<TOtherType*>(this->m_ptr.get());
+	}
+
+	template <typename TOtherType>
+	TOtherType* constCast() const {
+		return const_cast<TOtherType*>(this->m_ptr.get());
+	}
+
 	TType* operator->() const {
 		return m_ptr.get();
 	}
