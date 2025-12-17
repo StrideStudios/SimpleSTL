@@ -335,6 +335,12 @@ struct TUnfurled {
 };
 
 template <typename TType>
+struct TUnfurled<TType*> {
+	using Type = TType;
+	constexpr static bool isManaged = false;
+};
+
+template <typename TType>
 struct TUnfurled<TShared<TType>> {
 	using Type = TType;
 	constexpr static bool isManaged = true;
