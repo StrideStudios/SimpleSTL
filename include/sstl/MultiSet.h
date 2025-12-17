@@ -22,6 +22,14 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 		return ASSOCIATIVE_CONTAINS(m_Container, obj);
 	}
 
+	virtual bool contains(TUnfurled<TType>::Type* obj) const override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
+		} else {
+			return contains(*obj);
+		}
+	}
+
 	virtual void resize(const size_t amt) override {
 		for (size_t i = getSize(); i < amt; ++i) {
 			m_Container.emplace();

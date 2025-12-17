@@ -92,7 +92,7 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	RANGES(shuffle, vec, rng);
+	SHUFFLE(vec, rng);
 
 	container.resize(10, [&](TType& object, const size_t index) {
 		object = SObject{vec[index], containerName};
@@ -194,7 +194,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	RANGES(shuffle, vec, rng);
+	SHUFFLE(vec, rng);
 
 	size_t i = 0;
 
@@ -308,7 +308,7 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	std::random_device rd;
 	std::mt19937 rng(rd());
 
-	RANGES(shuffle, vec, rng);
+	SHUFFLE(vec, rng);
 
 	size_t i = 0;
 
@@ -461,6 +461,26 @@ int main() {
 	DO_MAP_TEST(TMultiMap)
 	DO_MAP_TEST(TPriorityMap)
 	DO_MAP_TEST(TPriorityMultiMap)
+
+	{
+		TVector<TUnique<SObject>> vec;
+		vec.push(SObject{100, "Hello unique"});
+		SObject* obb = vec.top().get();
+
+		if (vec.contains(obb)) {
+			std::cout << "Found obb in vector" << std::endl;
+		}
+	}
+
+	{
+		TSet<TUnique<SObject>> set;
+		set.push(SObject{100, "Hello unique"});
+		SObject* obb = set.top().get();
+
+		if (set.contains(obb)) {
+			std::cout << "Found obb in set" << std::endl;
+		}
+	}
 
 	return 0;
 }

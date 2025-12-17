@@ -7,22 +7,24 @@
 #include <algorithm>
 #endif
 
+#include "Memory.h"
 #include "Pair.h"
 
 #if CXX_VERSION >= 20
+#define FIND(c, x, ...) std::ranges::find(c, x, ##__VA_ARGS__)
+#define ERASE(c, x) c.erase(std::ranges::remove(c, x).begin(), c.end())
 #define ASSOCIATIVE_CONTAINS(c, x) c.contains(x)
-#define RANGES(func, c, x) std::ranges::func(c, x)
-#define REMOVE_RANGES(c, x) RANGES(remove, c, x).begin()
+#define DISTANCE(c, x, ...) std::ranges::distance(c.begin(), FIND(c, x, __VA_ARGS__))
+#define SHUFFLE(c, r) std::ranges::shuffle(c, r);
 #else
+#define FIND(c, x, ...) std::find(c.begin(), c.end(), x)
+#define ERASE(c, x) c.erase(std::remove(c.begin(), c.end(), x), c.end())
 #define ASSOCIATIVE_CONTAINS(c, x) c.find(x) != c.end()
-#define RANGES(func, c, x) std::func(c.begin(), c.end(), x)
-#define REMOVE_RANGES(c, x) RANGES(remove, c, x)
+#define DISTANCE(c, x, ...) std::distance(c.begin(), FIND(find, c, x))
+#define SHUFFLE(c, r) std::shuffle(c.begin(), c.end(), r);
 #endif
 
-#define FIND(c, x) RANGES(find, c, x)
-#define DISTANCE(c, x) RANGES(distance, c.begin(), FIND(c, x))
-#define CONTAINS(c, x) FIND(c, x) != c.end()
-#define ERASE(c, x) c.erase(REMOVE_RANGES(c, x), c.end())
+#define CONTAINS(c, x, ...) FIND(c, x, __VA_ARGS__) != c.end()
 
 // Makes it easy to see if a function is guaranteed or not
 #define GUARANTEED = 0;
@@ -62,8 +64,16 @@ struct TSequenceContainer {
 	virtual bool contains(const TType& obj) const
 		GUARANTEED
 
+	// Version of contains that guarantees raw pointer input
+	virtual bool contains(TUnfurled<TType>::Type* obj) const
+		GUARANTEED
+
 	// Find a certain element in the container
 	virtual size_t find(const TType& obj) const
+		GUARANTEED
+
+	// Version of contains that guarantees raw pointer input
+	virtual size_t find(TUnfurled<TType>::Type* obj) const
 		GUARANTEED
 
 	// Get an element at a specified index
@@ -265,6 +275,10 @@ struct TSingleAssociativeContainer {
 
 	// Checks if a certain object is contained within the container
 	virtual bool contains(const TType& obj) const
+		GUARANTEED
+
+	// Version of contains that guarantees raw pointer input
+	virtual bool contains(TUnfurled<TType>::Type* obj) const
 		GUARANTEED
 
 	// Fills container with n defaulted elements
