@@ -4,7 +4,7 @@
 #include "Container.h"
 
 template <typename TType, size_t TSize>
-struct TArray : TSequenceContainer<TType, TSize> {
+struct TArray : TSequenceContainer<TType> {
 
 	TArray() {
 		TArray::clear();

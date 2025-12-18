@@ -32,7 +32,7 @@
 
 // A basic container of any amount of objects
 // A size of 0 implies a dynamic array
-template <typename TType, size_t TSize = 0>
+template <typename TType>
 struct TSequenceContainer {
 
 	virtual ~TSequenceContainer() = default;
@@ -89,19 +89,15 @@ struct TSequenceContainer {
 	virtual const TType& operator[](const size_t index) const { return get(index); }
 
 	// Fills container with n defaulted elements
-	virtual void resize(size_t amt = TSize)
+	virtual void resize(size_t amt)
 		GUARANTEED
 
-	// Fills container with TType& elements with size TSize
-	void resize(std::function<void(TType&)> func) {
-		resize(TSize, func);
-	}
 	// Fills container with TType& elements with size amt
 	virtual void resize(size_t amt, std::function<void(TType&, size_t)> func)
 		GUARANTEED
 
 	// Reserves memory for n elements
-	virtual void reserve(size_t amt = TSize)
+	virtual void reserve(size_t amt)
 		NOT_GUARANTEED
 
 	// Adds a defaulted element to the container
