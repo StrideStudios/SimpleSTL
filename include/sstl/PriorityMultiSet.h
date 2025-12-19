@@ -40,7 +40,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		for (size_t i = getSize(); i < amt; ++i) {
 			TType obj;
 			func(obj);
-			m_Container.emplace(std::move(obj));
+			m_Container.emplace(std::forward<TType>(obj));
 		}
 	}
 
@@ -59,7 +59,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 
 	virtual void push(TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {
-			m_Container.emplace(std::move(obj));
+			m_Container.emplace(std::forward<TType>(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
@@ -78,7 +78,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 	virtual void replace(const TType& tgt, TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
-			m_Container.insert(std::move(obj));
+			m_Container.insert(std::forward<TType>(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
@@ -101,7 +101,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		auto itr = m_Container.extract(m_Container.find(obj));
 		// Prefer move, but copy if not available
 		if constexpr (std::is_move_constructible_v<TType>) {
-			otr.push(std::move(itr.value()));
+			otr.push(std::forward<TType>(itr.value()));
 		} else {
 			otr.push(itr.value());
 		}

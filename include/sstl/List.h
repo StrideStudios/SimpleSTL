@@ -90,7 +90,7 @@ struct TList : TSequenceContainer<TType> {
 
 	virtual size_t push(TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {
-			m_Container.emplace_back(std::move(obj));
+			m_Container.emplace_back(std::forward<TType>(obj));
 			return getSize() - 1;
 		} else {
 			throw std::runtime_error("Type is not moveable!");
@@ -111,7 +111,7 @@ struct TList : TSequenceContainer<TType> {
 		if constexpr (std::is_move_constructible_v<TType>) {
 			auto itr = m_Container.begin();
 			std::advance(itr, index);
-			m_Container.insert(itr, std::move(obj));
+			m_Container.insert(itr, std::forward<TType>(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
@@ -129,7 +129,7 @@ struct TList : TSequenceContainer<TType> {
 	virtual void replace(const size_t index, TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {
 			pop(index);
-			push(index, std::move(obj));
+			push(index, std::forward<TType>(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}

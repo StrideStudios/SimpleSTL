@@ -158,9 +158,15 @@ struct TSequenceContainer {
 	}
 
 	virtual void doFor(const size_t start, const size_t end, const std::function<void(size_t, TType&)>& func) {
+		for (int i = start; i < end; ++i) {
+			func(i, get(i));
+		}
 	}
 
 	virtual void doFor(const size_t start, const size_t end, const std::function<void(size_t, const TType&)>& func) const {
+		for (int i = start; i < end; ++i) {
+			func(i, get(i));
+		}
 	}
 
 	// Iterates through each element
