@@ -93,30 +93,30 @@ struct TQueue : TDeque<TType> {
 protected:
 
 	virtual TType& bottom() override {
-		throw std::runtime_error("TQueue can only be access in one direction!");
+		return TDeque<TType>::bottom();
 	}
 
 	virtual const TType& bottom() const override {
-		throw std::runtime_error("TQueue can only be access in one direction!");
+		return TDeque<TType>::bottom();
 	}
 
 	virtual TType& get(size_t index) override {
-		return top();
+		return TDeque<TType>::get(index);
 	}
 
 	virtual const TType& get(size_t index) const override {
-		return top();
+		return TDeque<TType>::get(index);
 	}
 
 	virtual void push(const size_t index, const TType& obj) override {
-		push(obj);
+		TDeque<TType>::push(index, obj);
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		push(obj);
+		TDeque<TType>::push(index, std::forward<TType>(obj));
 	}
 
 	virtual void pop(const size_t index) override {
-		pop();
+		TDeque<TType>::pop(index);
 	}
 };
