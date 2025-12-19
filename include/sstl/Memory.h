@@ -13,75 +13,102 @@ struct TUnique {
 
 	TUnique(nullptr_t) noexcept {}
 
-	template <typename... TArgs>
-	TUnique(TArgs&&... args) noexcept
-	: m_ptr(std::make_unique<TType>(args...)) {}
+	TUnique& operator=(nullptr_t) noexcept {
+		m_ptr = nullptr;
+		return *this;
+	}
 
-	template <typename TOtherType>
+	template <typename... TArgs,
+		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
+	>
+	TUnique(TArgs&&... args) noexcept
+	: m_ptr(std::make_unique<TType>(std::forward<TArgs>(args)...)) {}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
 #endif
-	TUnique(const TOtherType& otr) noexcept
+	TUnique(const TOtherType& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: m_ptr(std::make_unique<TOtherType>(otr)) {}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
 #endif
-	TUnique(TOtherType&& otr) noexcept
+	TUnique(TOtherType& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	: m_ptr(std::make_unique<TOtherType>(otr)) {}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+	>
+#if CXX_VERSION >= 20
+	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
+#endif
+	TUnique(TOtherType&& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TUnique(const TUnique<TOtherType>&) = delete;
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TUnique(TUnique<TOtherType>&) = delete;
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
 #endif
-	TUnique(TUnique<TOtherType>&& otr) noexcept
+	TUnique(TUnique<TOtherType>&& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TUnique(TUnique&& otr) noexcept
-	: m_ptr(std::forward<std::unique_ptr<TType>>(otr.m_ptr)) {}
-
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TUnique& operator=(const TOtherType& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
+	>
+	TUnique& operator=(const TOtherType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
 		this->m_ptr = std::make_unique<TOtherType>(otr);
 		return *this;
 	}
 
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TUnique& operator=(TOtherType&& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
+	>
+	TUnique& operator=(TOtherType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
+		this->m_ptr = std::make_unique<TOtherType>(otr);
+		return *this;
+	}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+	>
+	TUnique& operator=(TOtherType&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
 		this->m_ptr = std::make_unique<TOtherType>(std::forward<TOtherType>(otr));
 		return *this;
 	}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TUnique& operator=(const TUnique<TOtherType>& otr) = delete;
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
 
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TUnique& operator=(TUnique<TOtherType>&& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+	>
+	TUnique& operator=(TUnique<TOtherType>&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
 		this->m_ptr = std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr);
-		return *this;
-	}
-
-	TUnique& operator=(TUnique&& otr) noexcept {
-		this->m_ptr = std::forward<std::unique_ptr<TType>>(otr.m_ptr);
 		return *this;
 	}
 
@@ -179,91 +206,102 @@ struct TShared {
 
 	TShared(nullptr_t) noexcept {}
 
-	template <typename... TArgs>
-	TShared(TArgs&&... args) noexcept
-	: m_ptr(std::make_shared<TType>(args...)) {}
+	TShared& operator=(nullptr_t) noexcept {
+		m_ptr = nullptr;
+		return *this;
+	}
 
-	template <typename TOtherType>
+	template <typename... TArgs,
+		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
+	>
+	TShared(TArgs&&... args) noexcept
+	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
 #endif
-	TShared(const TOtherType& otr) noexcept
+	TShared(const TOtherType& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: m_ptr(std::make_shared<TOtherType>(otr)) {}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
 #endif
-	TShared(TOtherType&& otr) noexcept
+	TShared(TOtherType& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	: m_ptr(std::make_shared<TOtherType>(otr)) {}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+	>
+#if CXX_VERSION >= 20
+	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
+#endif
+	TShared(TOtherType&& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TShared(const TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>& otr) = delete;
 
-	TShared(const TShared& otr) noexcept
-	: m_ptr(otr.m_ptr) {}
-
-	TShared(TShared& otr) noexcept
-	: m_ptr(otr.m_ptr) {}
-
-	template <typename TOtherType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+	>
 #if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
+	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
 #endif
-	TShared(TShared<TOtherType>&& otr) noexcept
+	TShared(TShared<TOtherType>&& otr)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	TShared(TShared&& otr) noexcept
-	: m_ptr(std::forward<std::shared_ptr<TType>>(otr.m_ptr)) {}
-
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TShared& operator=(const TOtherType& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
+	>
+	TShared& operator=(const TOtherType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
 		this->m_ptr = std::make_shared<TOtherType>(otr);
 		return *this;
 	}
 
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TShared& operator=(TOtherType&& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
+	>
+	TShared& operator=(TOtherType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
+		this->m_ptr = std::make_shared<TOtherType>(otr);
+		return *this;
+	}
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+	>
+	TShared& operator=(TOtherType&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
 		this->m_ptr = std::make_shared<TOtherType>(std::forward<TOtherType>(otr));
 		return *this;
 	}
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TShared& operator=(const TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType>
+	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
 
-	TShared& operator=(const TShared& otr) noexcept {
-		this->m_ptr = otr.m_ptr;
-		return *this;
-	}
-
-	TShared& operator=(TShared& otr) noexcept {
-		this->m_ptr = otr.m_ptr;
-		return *this;
-	}
-
-	template <typename TOtherType>
-#if CXX_VERSION >= 20
-	requires std::is_base_of_v<TType, TOtherType>
-#endif
-	TShared& operator=(TShared<TOtherType>&& otr) noexcept {
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+	>
+	TShared& operator=(TShared<TOtherType>&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
 		this->m_ptr = std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr);
-		return *this;
-	}
-
-	TShared& operator=(TShared&& otr) noexcept {
-		this->m_ptr = std::forward<std::shared_ptr<TType>>(otr.m_ptr);
 		return *this;
 	}
 

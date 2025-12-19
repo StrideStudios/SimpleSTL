@@ -68,11 +68,11 @@ struct SObject : Parent{
 	}
 };
 
-template <typename TType, size_t TSize>
+template <typename TType>
 #if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
 #endif
-void containerTest(const std::string& containerName, TSequenceContainer<TType, TSize>& container) {
+void containerTest(const std::string& containerName, TSequenceContainer<TType>& container) {
 
 	TType obj = SObject{100, "Hello"};
 	TType obj2 = SObject{100, "Hello"};
@@ -111,11 +111,11 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType, T
 }
 
 
-template <typename TType, size_t TSize>
+template <typename TType>
 #if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
 #endif
-void transferTest(const std::string& containerName, TSequenceContainer<TType, TSize>& container) {
+void transferTest(const std::string& containerName, TSequenceContainer<TType>& container) {
 
 	{
 		std::cout << "Vector Transfer Test" << std::endl;

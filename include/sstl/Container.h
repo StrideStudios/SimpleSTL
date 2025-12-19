@@ -149,6 +149,20 @@ struct TSequenceContainer {
 		pop(index);
 	}
 
+	virtual void doFor(const size_t index, const std::function<void(TType&)>& func) {
+		func(get(index));
+	}
+
+	virtual void doFor(const size_t index, const std::function<void(const TType&)>& func) const {
+		func(get(index));
+	}
+
+	virtual void doFor(const size_t start, const size_t end, const std::function<void(size_t, TType&)>& func) {
+	}
+
+	virtual void doFor(const size_t start, const size_t end, const std::function<void(size_t, const TType&)>& func) const {
+	}
+
 	// Iterates through each element
 	virtual void forEach(const std::function<void(size_t, TType&)>& func)
 		GUARANTEED

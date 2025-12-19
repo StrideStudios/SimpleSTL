@@ -12,6 +12,12 @@ add_executable(SimpleSTL-Test
         Test.cpp
 )
 
+add_executable(SimpleSTL-ThreadedTest
+        ThreadedTest.cpp
+)
+
 target_include_directories(SimpleSTL-Test PUBLIC ../include)
+target_include_directories(SimpleSTL-ThreadedTest PUBLIC ../include)
 
 target_link_libraries(SimpleSTL-Test SimpleSTL)
+target_link_libraries(SimpleSTL-ThreadedTest SimpleSTL)
