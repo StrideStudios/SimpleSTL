@@ -34,7 +34,7 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 		for (size_t i = getSize(); i < amt; ++i) {
 			TPair<TKeyType, TValueType> pair;
 			func(pair);
-			m_Container.emplace(std::forward<TKeyType>(pair.key), std::forward<TValueType>(pair.value));
+			m_Container.emplace(std::forward<TKeyType>(pair.key()), std::forward<TValueType>(pair.value()));
 		}
 	}
 
@@ -72,7 +72,7 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 
 	virtual void push(const TPair<TKeyType, TValueType>& pair) override {
 		if constexpr (std::is_copy_constructible_v<TValueType>) {
-			m_Container.emplace(pair.key, pair.value);
+			m_Container.emplace(pair.key(), pair.value());
 		} else {
 			throw std::runtime_error("Type is not copyable!");
 		}
@@ -80,7 +80,7 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 
 	virtual void push(TPair<TKeyType, TValueType>&& pair) override {
 		if constexpr (std::is_move_constructible_v<TValueType>) {
-			m_Container.emplace(std::forward<TKeyType>(pair.key), std::forward<TValueType>(pair.value));
+			m_Container.emplace(std::forward<TKeyType>(pair.key()), std::forward<TValueType>(pair.value()));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}

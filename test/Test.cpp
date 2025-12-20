@@ -346,13 +346,13 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
 		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
-			std::cout << "Key: " << enumToString(obb.key) << " ";
-			getUnfurled(obb.value)->print();
+			std::cout << "Key: " << enumToString(obb.key()) << " ";
+			getUnfurled(obb.value())->print();
 		});
 		std::cout << "to:" << std::endl;
 		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
-			std::cout << "Key: " << enumToString(obb.key) << " ";
-			getUnfurled(obb.value)->print();
+			std::cout << "Key: " << enumToString(obb.key()) << " ";
+			getUnfurled(obb.value())->print();
 		});
 
 		assert(from.getSize() == 1);
@@ -362,13 +362,13 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "Post Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
 		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
-			std::cout << "Key: " << enumToString(obb.key) << " ";
-			getUnfurled(obb.value)->print();
+			std::cout << "Key: " << enumToString(obb.key()) << " ";
+			getUnfurled(obb.value())->print();
 		});
 		std::cout << "to:" << std::endl;
 		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
-			std::cout << "Key: " << enumToString(obb.key) << " ";
-			getUnfurled(obb.value)->print();
+			std::cout << "Key: " << enumToString(obb.key()) << " ";
+			getUnfurled(obb.value())->print();
 		});
 		std::cout << std::endl;
 
