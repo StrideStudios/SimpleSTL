@@ -14,14 +14,6 @@ struct TQueue : TDeque<TType> {
 		return TDeque<TType>::m_Container.back();
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
-		const size_t previousSize = TDeque<TType>::getSize();
-		TDeque<TType>::resize(amt);
-		for (size_t i = previousSize; i < TDeque<TType>::getSize(); ++i) {
-			func(TDeque<TType>::get(i), i);
-		}
-	}
-
 	virtual size_t push(const TType& obj) override {
 		if constexpr (std::is_copy_constructible_v<TType>) {
 			TDeque<TType>::m_Container.emplace_back(obj);

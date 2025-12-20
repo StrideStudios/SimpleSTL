@@ -12,7 +12,7 @@ struct TMaxHeap : TVector<TType> {
 		std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
+	virtual void resize(const size_t amt, std::function<TType(size_t)> func) override {
 		TVector<TType>::resize(amt, func);
 		std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 	}

@@ -31,22 +31,28 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void resize(const size_t amt) override {
-		for (size_t i = getSize(); i < amt; ++i) {
-			m_Container.emplace();
+		if constexpr (std::is_default_constructible_v<TType>) {
+			for (size_t i = getSize(); i < amt; ++i) {
+				m_Container.emplace();
+			}
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
 		}
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TType&)> func) override {
+	virtual void resize(const size_t amt, std::function<TType()> func) override {
 		for (size_t i = getSize(); i < amt; ++i) {
-			TType obj;
-			func(obj);
-			m_Container.emplace(std::forward<TType>(obj));
+			m_Container.emplace(std::forward<TType>(func()));
 		}
 	}
 
 	virtual const TType& push() override {
-		m_Container.emplace();
-		return top();
+		if constexpr (std::is_default_constructible_v<TType>) {
+			m_Container.emplace();
+			return top();
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
 	virtual void push(const TType& obj) override {

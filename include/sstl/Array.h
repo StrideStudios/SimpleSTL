@@ -67,25 +67,33 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual void resize(size_t amt) override {
-		for (size_t i = 0; i < getSize(); ++i) {
-			if (!m_IsPopulated[i]) {
-				m_Container[i] = {};
-				m_IsPopulated[i] = true;
+		if constexpr (std::is_default_constructible_v<TType>) {
+			for (size_t i = 0; i < amt; ++i) {
+				if (!m_IsPopulated[i]) {
+					m_Container[i] = {};
+					m_IsPopulated[i] = true;
+				}
 			}
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
 		}
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
-		for (size_t i = 0; i < getSize(); ++i) {
+	virtual void resize(const size_t amt, std::function<TType(size_t)> func) override {
+		for (size_t i = 0; i < amt; ++i) {
 			if (!m_IsPopulated[i]) {
-				func(get(i), i);
+				get(i) = std::forward<TType>(func(i));
 				m_IsPopulated[i] = true;
 			}
 		}
 	}
 
 	virtual TType& push() override {
-		return get(push(TType{}));
+		if constexpr (std::is_default_constructible_v<TType>) {
+			return get(push(TType{}));
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
 	virtual size_t push(const TType& obj) override {

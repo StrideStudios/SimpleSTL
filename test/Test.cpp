@@ -113,8 +113,8 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType>& 
 
 	SHUFFLE(vec, rng);
 
-	container.resize(10, [&](TType& object, const size_t index) {
-		object = SObject{vec[index], containerName};
+	container.resize(10, [&](const size_t index) {
+		return SObject{vec[index], containerName};
 	});
 	assert(container.getSize() == 10);
 
@@ -217,9 +217,10 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 
 	size_t i = 0;
 
-	container.resize(10, [&](TType& object) {
-		object = SObject{vec[i], containerName};
+	container.resize(10, [&] {
+		auto object = SObject{vec[i], containerName};
 		++i;
+		return object;
 	});
 	assert(container.getSize() == 10);
 
@@ -331,9 +332,10 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 
 	size_t i = 0;
 
-	container.resize(10, [&](TPair<MapEnum, TType>& pair) {
-		pair = TPair<MapEnum, TType>{(MapEnum)vec[i], SObject{vec[i], containerName}};
+	container.resize(10, [&] {
+		auto pair = TPair<MapEnum, TType>{(MapEnum)vec[i], SObject{vec[i], containerName}};
 		++i;
+		return pair;
 	});
 	assert(container.getSize() == 10);
 
@@ -486,8 +488,13 @@ int main() {
 	TUnique<Abstract> abb = SObject{100, "Hey"};
 	TUnique<SObject> abb2 = SObject{100, "Hey"};
 
-	//TPriorityMap<int, TUnique<Abstract>> map;
-	std::map<int, TUnique<Abstract>> map2;
+	TPriorityMap<int, std::reference_wrapper<Abstract>> map;
+	std::map<int, std::reference_wrapper<Abstract>> map2;
+	std::vector<std::reference_wrapper<Abstract>> vec2;
+	TVector<std::reference_wrapper<Abstract>> vec22;
+
+	SObject obb = SObject{100, "Hey"};
+	vec2.push_back(obb);
 
 	std::vector<TUnique<SObject>> m_Container;
 	m_Container.emplace_back(SObject{100, "Hello unique"});

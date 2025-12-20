@@ -6,11 +6,10 @@
 template <typename TType>
 struct TStack : TDeque<TType> {
 
-	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
+	virtual void resize(const size_t amt, std::function<TType(size_t)> func) override {
 		const size_t previousSize = TDeque<TType>::getSize();
-		TDeque<TType>::resize(amt);
-		for (size_t i = previousSize; i < TDeque<TType>::getSize(); ++i) {
-			func(TDeque<TType>::get(i), i);
+		for (size_t i = previousSize; i < amt; ++i) {
+			TDeque<TType>::m_Container.emplace_front(std::forward<TType>(func(i)));
 		}
 	}
 

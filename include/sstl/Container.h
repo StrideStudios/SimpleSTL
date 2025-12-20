@@ -93,7 +93,7 @@ struct TSequenceContainer {
 		GUARANTEED
 
 	// Fills container with TType& elements with size amt
-	virtual void resize(size_t amt, std::function<void(TType&, size_t)> func)
+	virtual void resize(size_t amt, std::function<TType(size_t)> func)
 		GUARANTEED
 
 	// Reserves memory for n elements
@@ -214,7 +214,7 @@ struct TAssociativeContainer {
 		GUARANTEED
 
 	// Fills container with TType& elements with size amt
-	virtual void resize(size_t amt, std::function<void(TPair<TKeyType, TValueType>&)> func)
+	virtual void resize(size_t amt, std::function<TPair<TKeyType, TValueType>()> func)
 		GUARANTEED
 
 	// Reserves memory for n elements
@@ -302,7 +302,7 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 
 	// Fills container with TType& elements with size amt
-	virtual void resize(size_t amt, std::function<void(TType&)> func)
+	virtual void resize(size_t amt, std::function<TType()> func)
 		GUARANTEED
 
 	// Reserves memory for n elements

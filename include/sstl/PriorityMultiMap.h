@@ -30,22 +30,29 @@ struct TPriorityMultiMap : TAssociativeContainer<TKeyType, TValueType> {
 		return m_Container.find(key)->second;
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TPair<TKeyType, TValueType>&)> func) override {
+	virtual void resize(const size_t amt, std::function<TPair<TKeyType, TValueType>()> func) override {
 		for (size_t i = getSize(); i < amt; ++i) {
-			TPair<TKeyType, TValueType> pair;
-			func(pair);
+			TPair<TKeyType, TValueType> pair = func();
 			m_Container.emplace(std::forward<TKeyType>(pair.key()), std::forward<TValueType>(pair.value()));
 		}
 	}
 
 	virtual TPair<TKeyType, const TValueType&> push() override {
-		m_Container.emplace();
-		return top();
+		if constexpr (std::is_default_constructible_v<TKeyType> && std::is_default_constructible_v<TValueType>) {
+			m_Container.emplace();
+			return top();
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
 	virtual TValueType& push(const TKeyType& key) override {
-		push(TPair<TKeyType, TValueType>{key, {}});
-		return get(key);
+		if constexpr (std::is_default_constructible_v<TValueType>) {
+			push(TPair<TKeyType, TValueType>{key, {}});
+			return get(key);
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
 	virtual TValueType& push(const TKeyType& key, const TValueType& value) override {

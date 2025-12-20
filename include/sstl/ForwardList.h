@@ -55,22 +55,30 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void resize(size_t amt) override {
-		m_Container.resize(amt);
-		m_Size = amt;
+		if constexpr (std::is_default_constructible_v<TType>) {
+			m_Container.resize(amt);
+			m_Size = amt;
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
-	virtual void resize(const size_t amt, std::function<void(TType&, size_t)> func) override {
+	virtual void resize(const size_t amt, std::function<TType(size_t)> func) override {
 		const size_t previousSize = getSize();
-		resize(amt);
-		for (size_t i = previousSize; i < getSize(); ++i) {
-			func(get(i), i);
+		for (size_t i = previousSize; i < amt; ++i) {
+			m_Container.emplace_front(std::forward<TType>(func(i)));
+			m_Size++;
 		}
 	}
 
 	virtual TType& push() override {
-		m_Container.emplace_front();
-		m_Size++;
-		return get(getSize() - 1);
+		if constexpr (std::is_default_constructible_v<TType>) {
+			m_Container.emplace_front();
+			m_Size++;
+			return get(getSize() - 1);
+		} else {
+			throw std::runtime_error("Type is not default constructible!");
+		}
 	}
 
 	virtual size_t push(const TType& obj) override {

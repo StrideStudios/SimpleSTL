@@ -8,8 +8,18 @@ struct TUnique {
 	TUnique(std::unique_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::unique_ptr<TType>>(ptr)) {}
 
-	TUnique() noexcept
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TUnique()
+	noexcept(std::is_nothrow_default_constructible_v<TOtherType>)
 	: m_ptr(std::make_unique<TType>()) {}
+
+	// If no default constructor is available for TType, we default to nullptr
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TUnique() noexcept {}
 
 	TUnique(nullptr_t) noexcept {}
 
@@ -184,8 +194,18 @@ struct TShared {
 	TShared(std::shared_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::shared_ptr<TType>>(ptr)) {}
 
-	TShared() noexcept
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TShared()
+	noexcept(std::is_nothrow_default_constructible_v<TOtherType>)
 	: m_ptr(std::make_shared<TType>()) {}
+
+	// If no default constructor is available for TType, we default to nullptr
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TShared() noexcept {}
 
 	TShared(nullptr_t) noexcept {}
 
