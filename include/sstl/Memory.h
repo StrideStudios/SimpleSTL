@@ -21,37 +21,29 @@ struct TUnique {
 	template <typename... TArgs,
 		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
 	>
-	TUnique(TArgs&&... args) noexcept
+	TUnique(TArgs&&... args)
+	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_unique<TType>(std::forward<TArgs>(args)...)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
-#endif
 	TUnique(const TOtherType& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_unique<TOtherType>(otr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
-#endif
 	TUnique(TOtherType& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_unique<TOtherType>(otr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
 	TUnique(TOtherType&& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
+	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType = TType>
@@ -60,40 +52,34 @@ struct TUnique {
 	template <typename TOtherType = TType>
 	TUnique(TUnique<TOtherType>&) = delete;
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
-	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
+	template <typename TOtherType = TType>
 	TUnique(TUnique<TOtherType>&& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TUnique& operator=(const TOtherType& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
-		this->m_ptr = std::make_unique<TOtherType>(otr);
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
+		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(otr));
 		return *this;
 	}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TUnique& operator=(TOtherType& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
-		this->m_ptr = std::make_unique<TOtherType>(otr);
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
+		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(otr));
 		return *this;
 	}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TUnique& operator=(TOtherType&& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
-		this->m_ptr = std::make_unique<TOtherType>(std::forward<TOtherType>(otr));
+	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
+		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(std::forward<TOtherType>(otr)));
 		return *this;
 	}
 
@@ -103,11 +89,8 @@ struct TUnique {
 	template <typename TOtherType = TType>
 	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
-	>
-	TUnique& operator=(TUnique<TOtherType>&& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
+	template <typename TOtherType = TType>
+	TUnique& operator=(TUnique<TOtherType>&& otr) {
 		this->m_ptr = std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
@@ -214,37 +197,29 @@ struct TShared {
 	template <typename... TArgs,
 		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
 	>
-	TShared(TArgs&&... args) noexcept
+	TShared(TArgs&&... args)
+	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
-#endif
 	TShared(const TOtherType& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_shared<TOtherType>(otr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
-#endif
 	TShared(TOtherType& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_shared<TOtherType>(otr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
 	TShared(TOtherType&& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
+	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
 	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
 
 	template <typename TOtherType = TType>
@@ -253,39 +228,33 @@ struct TShared {
 	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
-	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
+	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>&& otr)
-	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TShared& operator=(const TOtherType& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
 		this->m_ptr = std::make_shared<TOtherType>(otr);
 		return *this;
 	}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TShared& operator=(TOtherType& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
+	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
 		this->m_ptr = std::make_shared<TOtherType>(otr);
 		return *this;
 	}
 
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
 	>
 	TShared& operator=(TOtherType&& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
+	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
 		this->m_ptr = std::make_shared<TOtherType>(std::forward<TOtherType>(otr));
 		return *this;
 	}
@@ -296,11 +265,8 @@ struct TShared {
 	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
-	>
-	TShared& operator=(TShared<TOtherType>&& otr)
-	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
+	template <typename TOtherType = TType>
+	TShared& operator=(TShared<TOtherType>&& otr) {
 		this->m_ptr = std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
@@ -410,6 +376,11 @@ struct TUnfurled<TUnique<TType>> {
 	using Type = TType;
 	constexpr static bool isManaged = true;
 	constexpr static auto get = &TUnique<TType>::get;
+};
+
+template <typename TType>
+struct is_managed : std::bool_constant<TUnfurled<TType>::isManaged> {
+	// Determine whether TType is a managed pointer or not
 };
 
 template <typename TType>

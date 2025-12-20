@@ -3,6 +3,14 @@
 #include <map>
 #include "Container.h"
 
+/*struct Abstract2 {
+	virtual ~Abstract2() = default;
+	virtual void test() = 0;
+};
+
+using TKeyType = int;
+using TValueType = TUnique<Abstract2>;
+*/
 template <typename TKeyType, typename TValueType>
 struct TPriorityMap : TAssociativeContainer<TKeyType, TValueType> {
 

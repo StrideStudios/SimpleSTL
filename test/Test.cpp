@@ -21,9 +21,30 @@
 #include "sstl/MultiMap.h"
 #include "sstl/PriorityMultiMap.h"
 
-struct Parent {
+struct Abstract {
+	Abstract() = default;
+	Abstract(const size_t id): id(id) {}
+	virtual ~Abstract() = default;
+	virtual void print() const = 0;
+
+	friend bool operator<(const Abstract& fst, const Abstract& snd) {
+		return fst.id < snd.id;
+	}
+
+	friend bool operator==(const Abstract& fst, const Abstract& snd) {
+		return fst.id == snd.id;
+	}
+
+	friend size_t getHash(const Abstract& obj) {
+		return obj.id;
+	}
+
+	int id = 0;
+};
+
+struct Parent : Abstract{
 	Parent() = default;
-	Parent(const size_t id): id(id) {}
+	Parent(const size_t id): Abstract(id) {}
 	virtual ~Parent() = default;
 	virtual void print() const {
 		std::cout << "ID: " << id << std::endl;
@@ -40,8 +61,6 @@ struct Parent {
 	friend size_t getHash(const Parent& obj) {
 		return obj.id;
 	}
-
-	int id = 0;
 };
 
 struct SObject : Parent{
@@ -408,7 +427,7 @@ int main() {
 	lamb(obj);
 	obj->print();
 
-	TUnique<SObject> obj01 = {100, "Hello"};
+	TUnique<Parent> obj01 = SObject{100, "Hello"};
 	Parent* parent = obj01.get();
 
 	parent->print();
@@ -461,6 +480,17 @@ int main() {
 	DO_MAP_TEST(TMultiMap)
 	DO_MAP_TEST(TPriorityMap)
 	DO_MAP_TEST(TPriorityMultiMap)
+
+	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100, "Hey"});
+
+	TUnique<Abstract> abb = SObject{100, "Hey"};
+	TUnique<SObject> abb2 = SObject{100, "Hey"};
+
+	//TPriorityMap<int, TUnique<Abstract>> map;
+	std::map<int, TUnique<Abstract>> map2;
+
+	std::vector<TUnique<SObject>> m_Container;
+	m_Container.emplace_back(SObject{100, "Hello unique"});
 
 	{
 		TVector<TUnique<SObject>> vec;

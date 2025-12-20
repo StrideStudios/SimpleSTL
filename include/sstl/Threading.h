@@ -32,7 +32,8 @@ public:
 	template <typename... TArgs,
 		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
 	>
-	TThreadSafe(TArgs&&... args) noexcept
+	TThreadSafe(TArgs&&... args)
+	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_obj(std::forward<TArgs>(args)...) {}
 
 	template <typename TOtherType = TType,
