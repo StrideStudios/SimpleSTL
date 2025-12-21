@@ -64,7 +64,7 @@ public:
     constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
 #endif
 	TThreadSafe(TOtherType&& otr)
-	noexcept(std::is_constructible_v<TType, TOtherType>)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_obj(std::forward<TOtherType>(otr)) {}
 
 	template <typename TOtherType = TType,
@@ -74,7 +74,7 @@ public:
 	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
 #endif
 	TThreadSafe(const TThreadSafe<TOtherType>& otr)
-	noexcept(std::is_constructible_v<TType, const TOtherType&>)
+	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
 
 	template <typename TOtherType = TType,
@@ -84,7 +84,7 @@ public:
 	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
 #endif
 	TThreadSafe(TThreadSafe<TOtherType>& otr)
-	noexcept(std::is_constructible_v<TType, TOtherType&>)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
 
 	template <typename TOtherType = TType,
@@ -94,7 +94,7 @@ public:
 	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
 #endif
 	TThreadSafe(TThreadSafe<TOtherType>&& otr)
-	noexcept(std::is_constructible_v<TType, TOtherType>)
+	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_obj(std::forward<TOtherType>(otr.m_obj)) {}
 
 	template <typename TOtherType = TType,
