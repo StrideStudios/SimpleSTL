@@ -40,68 +40,80 @@ public:
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
 	>
-#if CXX_VERSION >= 20
-    constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
-#endif
 	TThreadSafe(const TOtherType& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: m_obj(otr) {}
 
+	TThreadSafe(const TType& otr)
+	noexcept(std::is_nothrow_copy_constructible_v<TType>)
+	: m_obj(otr) {}
+
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
-#endif
 	TThreadSafe(TOtherType& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	: m_obj(otr) {}
+
+	TThreadSafe(TType& otr)
+	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: m_obj(otr) {}
 
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
 	>
-#if CXX_VERSION >= 20
-    constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
 	TThreadSafe(TOtherType&& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_obj(std::forward<TOtherType>(otr)) {}
 
+	TThreadSafe(TType&& otr)
+	noexcept(std::is_nothrow_move_constructible_v<TType>)
+	: m_obj(std::forward<TType>(otr)) {}
+
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<const TOtherType&, TType>)
-#endif
 	TThreadSafe(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
+	: TThreadSafe(otr.m_obj) {}
+
+	TThreadSafe(const TThreadSafe& otr)
+	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType&, TType>)
-#endif
 	TThreadSafe(TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
+	: TThreadSafe(otr.m_obj) {}
+
+	TThreadSafe(TThreadSafe& otr)
+	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
 	>
-#if CXX_VERSION >= 20
-	constexpr explicit(!std::is_convertible_v<TOtherType, TType>)
-#endif
 	TThreadSafe(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
-	: m_obj(std::forward<TOtherType>(otr.m_obj)) {}
+	: TThreadSafe(std::forward<TOtherType>(otr.m_obj)) {}
+
+	TThreadSafe(TThreadSafe&& otr)
+	noexcept(std::is_nothrow_move_constructible_v<TType>)
+	: TThreadSafe(std::forward<TType>(otr.m_obj)) {}
 
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(const TOtherType& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
+		this->m_obj = otr;
+		return *this;
+	}
+
+	TThreadSafe& operator=(const TType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, const TType&>) {
 		this->m_obj = otr;
 		return *this;
 	}
@@ -115,6 +127,12 @@ public:
 		return *this;
 	}
 
+	TThreadSafe& operator=(TType& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TType&>) {
+		this->m_obj = otr;
+		return *this;
+	}
+
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
 	>
@@ -124,11 +142,23 @@ public:
 		return *this;
 	}
 
+	TThreadSafe& operator=(TType&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TType>) {
+		this->m_obj = std::forward<TType>(otr);
+		return *this;
+	}
+
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
+		this->m_obj = otr.m_obj;
+		return *this;
+	}
+
+	TThreadSafe& operator=(const TThreadSafe& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, const TType&>) {
 		this->m_obj = otr.m_obj;
 		return *this;
 	}
@@ -142,12 +172,24 @@ public:
 		return *this;
 	}
 
+	TThreadSafe& operator=(TThreadSafe& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TType&>) {
+		this->m_obj = otr.m_obj;
+		return *this;
+	}
+
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
 	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
 		this->m_obj = std::forward<TOtherType>(otr.m_obj);
+		return *this;
+	}
+
+	TThreadSafe& operator=(TThreadSafe&& otr)
+	noexcept(std::is_nothrow_assignable_v<TType&, TType>) {
+		this->m_obj = std::forward<TType>(otr.m_obj);
 		return *this;
 	}
 
