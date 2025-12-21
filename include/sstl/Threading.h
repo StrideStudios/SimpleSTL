@@ -151,9 +151,9 @@ public:
 		return *this;
 	}
 
-	void lockFor(const std::function<void()>& func) const {
+	void lockFor(const std::function<void(TType&)>& func) {
 		std::lock_guard lock(mtx);
-		func();
+		func(m_obj);
 	}
 
 	decltype(auto) operator->() {
