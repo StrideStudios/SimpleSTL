@@ -26,7 +26,7 @@ struct TUnique {
 
 	// If incomplete type or no default constructor is available for TType, we default to nullptr
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::disjunction_v<std::negate<is_complete<TType>>, std::negate<std::is_default_constructible<TOtherType>>>, int> = 0
+		std::enable_if_t<std::disjunction_v<std::negation<is_complete<TType>>, std::negation<std::is_default_constructible<TOtherType>>>, int> = 0
 	>
 	TUnique() noexcept {}
 
@@ -212,7 +212,7 @@ struct TShared {
 
 	// If incomplete type or no default constructor is available for TType, we default to nullptr
 	template <typename TOtherType = TType,
-		std::enable_if_t<std::disjunction_v<std::negate<is_complete<TType>>, std::negate<std::is_default_constructible<TOtherType>>>, int> = 0
+		std::enable_if_t<std::disjunction_v<std::negation<is_complete<TType>>, std::negation<std::is_default_constructible<TOtherType>>>, int> = 0
 	>
 	TShared() noexcept {}
 
