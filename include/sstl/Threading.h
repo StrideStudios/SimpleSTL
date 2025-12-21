@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <mutex>
+#include <functional>
 
 #include "Memory.h"
 
@@ -10,9 +11,9 @@ template <typename TType>
 class TThreadSafe {
 
 	template<typename TParent, typename TMutex>
-	struct lock : std::lock_guard<TMutex> {
+	struct safe_lock : std::lock_guard<TMutex> {
 
-		explicit lock(TParent* parent, TMutex& mtx) noexcept
+		explicit safe_lock(TParent* parent, TMutex& mtx) noexcept
 		: std::lock_guard<TMutex>(mtx),
 		  parent(parent) {}
 
@@ -150,19 +151,24 @@ public:
 		return *this;
 	}
 
+	void lockFor(const std::function<void()>& func) const {
+		std::lock_guard lock(mtx);
+		func();
+	}
+
 	decltype(auto) operator->() {
 		if constexpr (TUnfurled<std::remove_reference_t<TType>>::isManaged) {
-			return lock(m_obj.get(), mtx);
+			return safe_lock(m_obj.get(), mtx);
 		} else {
-			return lock(&m_obj, mtx);
+			return safe_lock(&m_obj, mtx);
 		}
 	}
 
 	decltype(auto) operator->() const {
 		if constexpr (TUnfurled<std::remove_reference_t<TType>>::isManaged) {
-			return lock(m_obj.get(), mtx);
+			return safe_lock(m_obj.get(), mtx);
 		} else {
-			return lock(&m_obj, mtx);
+			return safe_lock(&m_obj, mtx);
 		}
 	}
 
@@ -194,7 +200,7 @@ public:
 		return getHash(static_cast<const TType&>(obj));
 	}
 
-public:
+private:
 	template <typename>
 	friend class TThreadSafe;
 
