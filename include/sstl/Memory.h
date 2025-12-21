@@ -29,7 +29,7 @@ struct TUnique {
 	}
 
 	template <typename... TArgs,
-		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::negation<std::is_null_pointer<TArgs>>..., std::is_constructible<TType, TArgs...>>, int> = 0
 	>
 	TUnique(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
@@ -215,7 +215,7 @@ struct TShared {
 	}
 
 	template <typename... TArgs,
-		std::enable_if_t<std::is_constructible_v<TType, TArgs...>, int> = 0
+		std::enable_if_t<std::conjunction_v<std::negation<std::is_null_pointer<TArgs>>..., std::is_constructible<TType, TArgs...>>, int> = 0
 	>
 	TShared(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
@@ -247,6 +247,16 @@ struct TShared {
 
 	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>& otr) = delete;
+
+	/*
+	 * Allow copies of same type
+	 */
+
+	TShared(const TShared& otr)
+	: m_ptr(otr.m_ptr) {}
+
+	TShared(TShared& otr)
+	: m_ptr(otr.m_ptr) {}
 
 	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>&& otr)
@@ -284,6 +294,20 @@ struct TShared {
 
 	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
+
+	/*
+	 * Allow copies of same type
+	 */
+
+	TShared& operator=(const TShared& otr) {
+		this->m_ptr = otr.m_ptr;
+		return *this;
+	}
+
+	TShared& operator=(TShared& otr) {
+		this->m_ptr = otr.m_ptr;
+		return *this;
+	}
 
 	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>&& otr) {
