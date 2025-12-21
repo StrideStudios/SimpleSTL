@@ -248,5 +248,5 @@ private:
 
 	TType m_obj;
 
-	mutable std::mutex mtx;
+	mutable std::recursive_mutex mtx;
 };
