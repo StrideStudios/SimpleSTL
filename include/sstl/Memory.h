@@ -2,32 +2,14 @@
 
 #include <memory>
 
-// When the template is instantiated, it always evaluates to that value, regardless of completion
-// So for c++20 we can use concepts, otherwise we ignore this requirement
-#if CXX_VERSION > 20
-template <typename TType>
-concept Complete = requires { sizeof(TType) > 0; };
-#define COMPLETE_TYPE Complete
-#else
-#define COMPLETE_TYPE typename
-#endif
-
 template <typename TType>
 struct TUnique {
 
 	TUnique(std::unique_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::unique_ptr<TType>>(ptr)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_default_constructible<TOtherType>>, int> = 0
-	>
-	TUnique()
-	noexcept(std::is_nothrow_default_constructible_v<TOtherType>)
-	: m_ptr(std::make_unique<TType>()) {}
-
-	// If incomplete type or no default constructor is available for TType, we default to nullptr
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::disjunction_v<std::negation<std::is_default_constructible<TOtherType>>>, int> = 0
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
 	>
 	TUnique() noexcept {}
 
@@ -38,99 +20,49 @@ struct TUnique {
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType = TType, typename... TArgs,
-		std::enable_if_t<std::conjunction_v<std::negation<std::is_null_pointer<TArgs>>..., std::is_constructible<TOtherType, TArgs...>>, int> = 0
-	>
+	template <typename... TArgs>
 	TUnique(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_unique<TType>(std::forward<TArgs>(args)...)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique(const TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_unique<TOtherType>(otr)) {}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique(TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_unique<TOtherType>(otr)) {}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_constructible<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique(TOtherType&& otr)
-	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::unique_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_unique<TOtherType>(std::forward<TOtherType>(otr))) {}
-
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique(const TUnique<TOtherType>&) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique(TUnique<TOtherType>&) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique(TUnique<TOtherType>&& otr)
 	: m_ptr(std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique& operator=(const TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(otr));
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique& operator=(TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(otr));
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_assignable<std::unique_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TUnique& operator=(TOtherType&& otr)
-	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::unique_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::unique_ptr<TType>(std::make_unique<TOtherType>(std::forward<TOtherType>(otr)));
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique& operator=(const TUnique<TOtherType>& otr) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TUnique& operator=(TUnique<TOtherType>&& otr) {
 		this->m_ptr = std::forward<std::unique_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TOtherType* staticCast() const {
 		return static_cast<TOtherType*>(this->m_ptr.get());
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TOtherType* dynamicCast() const {
 		return dynamic_cast<TOtherType*>(this->m_ptr.get());
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TOtherType* reinterpretCast() const {
 		return reinterpret_cast<TOtherType*>(this->m_ptr.get());
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TOtherType* constCast() const {
 		return const_cast<TOtherType*>(this->m_ptr.get());
 	}
@@ -204,16 +136,8 @@ struct TShared {
 	TShared(std::shared_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::forward<std::shared_ptr<TType>>(ptr)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_default_constructible<TOtherType>>, int> = 0
-	>
-	TShared()
-	noexcept(std::is_nothrow_default_constructible_v<TOtherType>)
-	: m_ptr(std::make_shared<TType>()) {}
-
-	// If incomplete type or no default constructor is available for TType, we default to nullptr
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::disjunction_v<std::negation<std::is_default_constructible<TOtherType>>>, int> = 0
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
 	>
 	TShared() noexcept {}
 
@@ -224,126 +148,73 @@ struct TShared {
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType = TType, typename... TArgs,
-		std::enable_if_t<std::conjunction_v<std::negation<std::is_null_pointer<TArgs>>..., std::is_constructible<TOtherType, TArgs...>>, int> = 0
-	>
+	template <typename... TArgs>
 	TShared(TArgs&&... args)
+	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared(const TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_shared<TOtherType>(otr)) {}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared(TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_shared<TOtherType>(otr)) {}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_constructible<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared(TOtherType&& otr)
-	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_constructible_v<std::shared_ptr<TType>, TOtherType*>)
-	: m_ptr(std::make_shared<TOtherType>(std::forward<TOtherType>(otr))) {}
-
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared(const TShared<TOtherType>& otr) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>& otr) = delete;
 
 	/*
 	 * Allow copies of same type
 	 */
 
-	template <COMPLETE_TYPE TOtherType = TType>
 	TShared(const TShared& otr)
 	: m_ptr(otr.m_ptr) {}
 
-	template <COMPLETE_TYPE TOtherType = TType>
 	TShared(TShared& otr)
 	: m_ptr(otr.m_ptr) {}
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared(TShared<TOtherType>&& otr)
 	: m_ptr(std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr)) {}
 
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared& operator=(const TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::make_shared<TOtherType>(otr);
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_copy_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared& operator=(TOtherType& otr)
-	noexcept(std::is_nothrow_copy_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::make_shared<TOtherType>(otr);
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<std::is_move_constructible<TOtherType>, std::is_assignable<std::shared_ptr<TType>, TOtherType*>>, int> = 0
-	>
-	TShared& operator=(TOtherType&& otr)
-	noexcept(std::is_nothrow_move_constructible_v<TOtherType> && std::is_nothrow_assignable_v<std::shared_ptr<TType>, TOtherType*>) {
-		this->m_ptr = std::make_shared<TOtherType>(std::forward<TOtherType>(otr));
-		return *this;
-	}
-
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared& operator=(const TShared<TOtherType>& otr) = delete;
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
 
 	/*
 	 * Allow copies of same type
 	 */
 
-	template <COMPLETE_TYPE TOtherType = TType>
 	TShared& operator=(const TShared& otr) {
 		this->m_ptr = otr.m_ptr;
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType = TType>
 	TShared& operator=(TShared& otr) {
 		this->m_ptr = otr.m_ptr;
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType = TType>
+	template <typename TOtherType = TType>
 	TShared& operator=(TShared<TOtherType>&& otr) {
 		this->m_ptr = std::forward<std::shared_ptr<TOtherType>>(otr.m_ptr);
 		return *this;
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TShared<TOtherType> staticCast() const {
 		return TShared<TOtherType>{std::static_pointer_cast<TOtherType, TType>(this->m_ptr)};
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TShared<TOtherType> dynamicCast() const {
 		return TShared<TOtherType>{std::dynamic_pointer_cast<TOtherType, TType>(this->m_ptr)};
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TShared<TOtherType> reinterpretCast() const {
 		return TShared<TOtherType>{std::reinterpret_pointer_cast<TOtherType, TType>(this->m_ptr)};
 	}
 
-	template <COMPLETE_TYPE TOtherType>
+	template <typename TOtherType>
 	TShared<TOtherType> constCast() const {
 		return TShared<TOtherType>{std::const_pointer_cast<TOtherType, TType>(this->m_ptr)};
 	}

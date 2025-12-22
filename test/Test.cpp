@@ -88,6 +88,19 @@ struct SObject : Parent{
 };
 
 template <typename TType>
+struct Test {
+
+	Test() = default;
+
+	template <typename... TArgs>
+	Test(TArgs&&... args)
+	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
+
+	std::shared_ptr<TType> m_ptr = nullptr;
+
+};
+
+template <typename TType>
 #if CXX_VERSION >= 20
 requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
 #endif
@@ -485,7 +498,7 @@ int main() {
 
 	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100, "Hey"});
 
-	TUnique<Abstract> abb = SObject{100, "Hey"};
+	TUnique<Abstract> abb = TUnique<SObject>{100, "Hey"};
 	TUnique<SObject> abb2 = SObject{100, "Hey"};
 
 	TPriorityMap<int, std::reference_wrapper<Abstract>> map;
@@ -518,6 +531,19 @@ int main() {
 			std::cout << "Found obb in set" << std::endl;
 		}
 	}
+
+	Test<SObject> testObb = SObject{100, "Hello"};
+
+	testObb.m_ptr->print();
+
+	testObb = SObject{200, "Hello"};
+
+	testObb.m_ptr->print();
+
+	auto oj = SObject{300, "Hello"};
+	testObb = oj;
+
+	testObb.m_ptr->print();
 
 	return 0;
 }
