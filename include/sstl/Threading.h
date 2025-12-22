@@ -30,81 +30,87 @@ public:
 
 	TThreadSafe() noexcept {}
 
-	template <typename... TArgs,
-		std::enable_if_t<std::conjunction_v<is_complete<TType>, std::is_constructible<TType, TArgs...>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType, typename... TArgs,
+		std::enable_if_t<std::is_constructible_v<TOtherType, TArgs...>, int> = 0
 	>
 	TThreadSafe(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_obj(std::forward<TArgs>(args)...) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, const TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
 	>
 	TThreadSafe(const TOtherType& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: m_obj(otr) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(const TType& otr)
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: m_obj(otr) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
 	>
 	TThreadSafe(TOtherType& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
 	: m_obj(otr) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(TType& otr)
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: m_obj(otr) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, TOtherType>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
 	>
 	TThreadSafe(TOtherType&& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: m_obj(std::forward<TOtherType>(otr)) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(TType&& otr)
 	noexcept(std::is_nothrow_move_constructible_v<TType>)
 	: m_obj(std::forward<TType>(otr)) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, const TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, const TOtherType&>, int> = 0
 	>
 	TThreadSafe(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(const TThreadSafe& otr)
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType&>, int> = 0
 	>
 	TThreadSafe(TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(TThreadSafe& otr)
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_constructible<TType, TOtherType>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_constructible_v<TType, TOtherType>, int> = 0
 	>
 	TThreadSafe(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
 	: TThreadSafe(std::forward<TOtherType>(otr.m_obj)) {}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe(TThreadSafe&& otr)
 	noexcept(std::is_nothrow_move_constructible_v<TType>)
 	: TThreadSafe(std::forward<TType>(otr.m_obj)) {}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, const TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(const TOtherType& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
@@ -112,14 +118,15 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(const TType& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TType&>) {
 		this->m_obj = otr;
 		return *this;
 	}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(TOtherType& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
@@ -127,14 +134,15 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(TType& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TType&>) {
 		this->m_obj = otr;
 		return *this;
 	}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, TOtherType>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
 	>
 	TThreadSafe& operator=(TOtherType&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
@@ -142,14 +150,15 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(TType&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TType>) {
 		this->m_obj = std::forward<TType>(otr);
 		return *this;
 	}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, const TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, const TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
@@ -157,14 +166,15 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(const TThreadSafe& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TType&>) {
 		this->m_obj = otr.m_obj;
 		return *this;
 	}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, TOtherType&>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType&>, int> = 0
 	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
@@ -172,14 +182,15 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(TThreadSafe& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TType&>) {
 		this->m_obj = otr.m_obj;
 		return *this;
 	}
 
-	template <typename TOtherType = TType,
-		std::enable_if_t<std::conjunction_v<is_complete<TOtherType>, std::is_assignable<TType&, TOtherType>>, int> = 0
+	template <COMPLETE_TYPE TOtherType = TType,
+		std::enable_if_t<std::is_assignable_v<TType&, TOtherType>, int> = 0
 	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
@@ -187,6 +198,7 @@ public:
 		return *this;
 	}
 
+	template <COMPLETE_TYPE TOtherType = TType>
 	TThreadSafe& operator=(TThreadSafe&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TType>) {
 		this->m_obj = std::forward<TType>(otr.m_obj);
