@@ -69,7 +69,7 @@ struct TSet : TSingleAssociativeContainer<TType> {
 
 	virtual void push(TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {
-			m_Container.emplace(std::forward<TType>(obj));
+			m_Container.emplace(std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
@@ -88,7 +88,7 @@ struct TSet : TSingleAssociativeContainer<TType> {
 	virtual void replace(const TType& tgt, TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {// Since this container is unordered, replacing doesn't need to set at the same index
 			pop(tgt);
-			m_Container.insert(std::forward<TType>(obj));
+			m_Container.insert(std::move(obj));
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}
@@ -111,7 +111,7 @@ struct TSet : TSingleAssociativeContainer<TType> {
 		auto itr = m_Container.extract(m_Container.find(obj));
 		// Prefer move, but copy if not available
 		if constexpr (std::is_move_constructible_v<TType>) {
-			otr.push(std::forward<TType>(itr.value()));
+			otr.push(std::move(itr.value()));
 		} else {
 			otr.push(itr.value());
 		}

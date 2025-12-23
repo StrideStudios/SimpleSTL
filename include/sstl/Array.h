@@ -116,7 +116,7 @@ struct TArray : TSequenceContainer<TType> {
 			for (size_t i = 0; i < getSize(); ++i) {
 				if (!m_IsPopulated[i]) { //is not populated
 					m_IsPopulated[i] = true;
-					m_Container[i] = std::forward<TType>(obj);
+					m_Container[i] = std::move(obj);
 					return i;
 				}
 			}
@@ -131,7 +131,7 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		replace(index, std::forward<TType>(obj));
+		replace(index, std::move(obj));
 	}
 
 	virtual void replace(const size_t index, const TType& obj) override {
@@ -144,7 +144,7 @@ struct TArray : TSequenceContainer<TType> {
 
 	virtual void replace(const size_t index, TType&& obj) override {
 		if constexpr (std::is_move_constructible_v<TType>) {
-			m_Container[index] = std::forward<TType>(obj);
+			m_Container[index] = std::move(obj);
 		} else {
 			throw std::runtime_error("Type is not moveable!");
 		}

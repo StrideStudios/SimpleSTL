@@ -30,7 +30,7 @@ struct TMaxHeap : TVector<TType> {
 	}
 
 	virtual size_t push(TType&& obj) override {
-		TVector<TType>::push(std::forward<TType>(obj));
+		TVector<TType>::push(std::move(obj));
 		std::push_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 		return TVector<TType>::getSize() - 1;
 	}
@@ -52,7 +52,7 @@ protected:
 	}
 
 	virtual void push(const size_t index, TType&& obj) override {
-		push(std::forward<TType>(obj));
+		push(std::move(obj));
 	}
 
 	virtual void pop(const size_t index) override {

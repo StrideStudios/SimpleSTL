@@ -13,7 +13,7 @@ class TThreadSafe {
 	template<typename TParent, typename TMutex>
 	struct safe_lock : std::lock_guard<TMutex> {
 
-		explicit safe_lock(TParent* parent, TMutex& mtx) noexcept
+		explicit safe_lock(TParent* parent, TMutex& mtx) noexcept(false)
 		: std::lock_guard<TMutex>(mtx),
 		  parent(parent) {}
 
@@ -35,7 +35,9 @@ public:
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_obj(std::forward<TArgs>(args)...) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, const TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
@@ -44,7 +46,9 @@ public:
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe(TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType&>)
 	: TThreadSafe(otr.m_obj) {}
@@ -53,16 +57,20 @@ public:
 	noexcept(std::is_nothrow_copy_constructible_v<TType>)
 	: TThreadSafe(otr.m_obj) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_constructible_v<TType, TOtherType>)
-	: TThreadSafe(std::forward<TOtherType>(otr.m_obj)) {}
+	: TThreadSafe(std::move(otr.m_obj)) {}
 
 	TThreadSafe(TThreadSafe&& otr)
 	noexcept(std::is_nothrow_move_constructible_v<TType>)
-	: TThreadSafe(std::forward<TType>(otr.m_obj)) {}
+	: TThreadSafe(std::move(otr.m_obj)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe& operator=(const TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, const TOtherType&>) {
 		this->m_obj = otr.m_obj;
@@ -75,7 +83,9 @@ public:
 		return *this;
 	}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType&>) {
 		this->m_obj = otr.m_obj;
@@ -88,25 +98,27 @@ public:
 		return *this;
 	}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TOtherType>) {
-		this->m_obj = std::forward<TOtherType>(otr.m_obj);
+		this->m_obj = std::move(otr.m_obj);
 		return *this;
 	}
 
 	TThreadSafe& operator=(TThreadSafe&& otr)
 	noexcept(std::is_nothrow_assignable_v<TType&, TType>) {
-		this->m_obj = std::forward<TType>(otr.m_obj);
+		this->m_obj = std::move(otr.m_obj);
 		return *this;
 	}
 
-	void lockFor(const std::function<void(TType&)>& func) {
+	void lockFor(const std::function<void(TType&)>& func) noexcept(false) {
 		std::lock_guard lock(mtx);
 		func(m_obj);
 	}
 
-	decltype(auto) operator->() {
+	decltype(auto) operator->() noexcept(false) {
 		if constexpr (TUnfurled<std::remove_reference_t<TType>>::isManaged) {
 			return safe_lock(m_obj.get(), mtx);
 		} else {
@@ -114,7 +126,7 @@ public:
 		}
 	}
 
-	decltype(auto) operator->() const {
+	decltype(auto) operator->() const noexcept(false) {
 		if constexpr (TUnfurled<std::remove_reference_t<TType>>::isManaged) {
 			return safe_lock(m_obj.get(), mtx);
 		} else {
@@ -122,31 +134,31 @@ public:
 		}
 	}
 
-	friend bool operator<(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator<(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj < snd.m_obj;
 	}
 
-	friend bool operator<=(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator<=(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj <= snd.m_obj;
 	}
 
-	friend bool operator>(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator>(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj > snd.m_obj;
 	}
 
-	friend bool operator>=(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator>=(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj >= snd.m_obj;
 	}
 
-	friend bool operator==(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator==(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj == snd.m_obj;
 	}
 
-	friend bool operator!=(const TThreadSafe& fst, const TThreadSafe& snd) {
+	friend bool operator!=(const TThreadSafe& fst, const TThreadSafe& snd) noexcept {
 		return fst.m_obj != snd.m_obj;
 	}
 
-	friend size_t getHash(const TThreadSafe& obj) {
+	friend size_t getHash(const TThreadSafe& obj) noexcept {
 		return getHash(static_cast<const TType&>(obj));
 	}
 

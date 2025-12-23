@@ -545,5 +545,48 @@ int main() {
 
 	testObb.m_ptr->print();
 
+	TShared<SObject> testSharedForWeak{100, "SObject"};
+
+	std::cout << "Pre Weak Say: ";
+	testSharedForWeak->print();
+
+	TWeak<SObject> testWeak{testSharedForWeak};
+
+	std::cout << "Weak Say: ";
+	if (testWeak) {
+		testWeak->print();
+	} else {
+		std::cout << "No Weak!";
+	}
+
+	TShared<SObject> testShared2{testWeak};
+
+	std::cout << "Post Weak Say: ";
+	testShared2->print();
+
+	struct RequirePointer {
+		RequirePointer() = default;
+		RequirePointer(const TShared<SObject>& objectWithPointer) {
+			std::cout << "Require pointer got pointer from: ";
+			objectWithPointer->print();
+		}
+	};
+
+	struct FromHelper : SObject, TSharedFrom<FromHelper> {
+
+		using SObject::SObject;
+
+		void init() {
+			myFriend = getShared().staticCast<SObject>();
+		}
+
+	private:
+
+		RequirePointer myFriend;
+	};
+
+	TShared<FromHelper> frend{100, "Hey"};
+	frend->init();
+
 	return 0;
 }
