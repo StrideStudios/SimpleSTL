@@ -601,5 +601,33 @@ int main() {
 	std::cout << "Post pop: ";
 	setObjs.forEach([](const TUnique<SObject>& obj) { obj->print(); });
 
+	std::cout << std::endl << std::endl;
+	TSet<TUnique<SObject>> setObjs0;
+	TSet<TUnique<SObject>> setObjs1;
+
+	setObjs0.push(TUnique<SObject>{100, "Hello0"});
+	SObject* transferPtr = setObjs0.top().get();
+	std::cout << std::endl << std::endl;
+	std::cout << "Pre set: ";
+
+	std::cout << std::endl;
+	std::cout << "obs0: ";
+	setObjs0.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+	std::cout << std::endl;
+	std::cout << "obs1: ";
+	setObjs1.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+
+	setObjs0.transfer(setObjs1, transferPtr);
+
+	std::cout << std::endl << std::endl;
+	std::cout << "Post set: ";
+
+	std::cout << std::endl;
+	std::cout << "obs0: ";
+	setObjs0.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+	std::cout << std::endl;
+	std::cout << "obs1: ";
+	setObjs1.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+
 	return 0;
 }

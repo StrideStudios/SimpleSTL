@@ -121,6 +121,21 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		}
 	}
 
+	virtual void transfer(TSingleAssociativeContainer<TType>& otr, TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			if (!this->contains(obj)) return;
+			auto itr = m_Container.extract(FIND(m_Container, obj, TUnfurled<TType>::get));
+			// Prefer move, but copy if not available
+			if constexpr (std::is_move_constructible_v<TType>) {
+				otr.push(std::move(itr.value()));
+			} else {
+				otr.push(itr.value());
+			}
+		} else {
+			transfer(otr, *obj);
+		}
+	}
+
 	virtual void forEach(const std::function<void(const TType&)>& func) const override {
 		for (auto itr = m_Container.begin(); itr != m_Container.end(); ++itr) {
 			func(*itr);

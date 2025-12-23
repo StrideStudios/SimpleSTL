@@ -339,7 +339,7 @@ struct TSingleAssociativeContainer {
 	// Removes an element from the container
 	virtual void pop(const TType&)
 		GUARANTEED
-	// Version of pop that guarantees raw pointer input is O(n), unlike normal pop, due to comparisons
+	// Version of pop that guarantees raw pointer input, is O(n), unlike normal pop, due to comparisons
 	virtual void pop(TUnfurled<TType>::Type* obj)
 		GUARANTEED
 
@@ -347,6 +347,10 @@ struct TSingleAssociativeContainer {
 	// Has to be overridden due to object lifetimes and extraction
 	virtual void transfer(TSingleAssociativeContainer& otr, TType& obj)
 		GUARANTEED
+
+	// Version of transfer that guarantees raw pointer input
+	virtual void transfer(TSingleAssociativeContainer& otr, TUnfurled<TType>::Type* obj)
+		NOT_GUARANTEED
 
 	// Iterates through each element
 	virtual void forEach(const std::function<void(const TType&)>& func) const
