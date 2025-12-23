@@ -571,12 +571,26 @@ template <typename TType>
 struct TUnfurled {
 	using Type = TType;
 	constexpr static bool isManaged = false;
+
+	template <typename TOtherType, typename... TArgs,
+		std::enable_if_t<std::is_convertible_v<TOtherType, TType>, int> = 0
+	>
+	static TType create(TArgs&&... args) {
+		return TOtherType(std::forward<TArgs>(args)...);
+	}
 };
 
 template <typename TType>
 struct TUnfurled<TType*> {
 	using Type = TType;
 	constexpr static bool isManaged = false;
+
+	template <typename TOtherType, typename... TArgs,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
+	static TType* create(TArgs&&... args) {
+		return new TOtherType(std::forward<TArgs>(args)...);
+	}
 };
 
 template <typename TType>
@@ -584,6 +598,13 @@ struct TUnfurled<TShared<TType>> {
 	using Type = TType;
 	constexpr static bool isManaged = true;
 	constexpr static auto get = &TShared<TType>::get;
+
+	template <typename TOtherType, typename... TArgs,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
+	static TShared<TType> create(TArgs&&... args) {
+		return TShared<TOtherType>(std::forward<TArgs>(args)...);
+	}
 };
 
 template <typename TType>
@@ -591,6 +612,13 @@ struct TUnfurled<TUnique<TType>> {
 	using Type = TType;
 	constexpr static bool isManaged = true;
 	constexpr static auto get = &TUnique<TType>::get;
+
+	template <typename TOtherType, typename... TArgs,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
+	static TUnique<TType> create(TArgs&&... args) {
+		return TUnique<TOtherType>(std::forward<TArgs>(args)...);
+	}
 };
 
 template <typename TType>
@@ -600,10 +628,15 @@ struct TUnfurled<TWeak<TType>> {
 	constexpr static auto get = &TWeak<TType>::get;
 };
 
+/*
+ * Determine whether TType is a managed pointer or not
+ */
+
 template <typename TType>
-struct is_managed : std::bool_constant<TUnfurled<TType>::isManaged> {
-	// Determine whether TType is a managed pointer or not
-};
+constexpr bool is_managed_v = TUnfurled<TType>::isManaged;
+
+template <typename TType>
+struct is_managed : std::bool_constant<is_managed_v<TType>> {};
 
 template <typename TType>
 TType* getUnfurled(TType* type) {

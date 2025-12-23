@@ -102,19 +102,9 @@ struct Test {
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void containerTest(const std::string& containerName, TSequenceContainer<TType>& container) {
-
-	TType obj = SObject{100, "Hello"};
-	TType obj2 = SObject{100, "Hello"};
-	container.push(std::move(obj));
-	auto& point = container.top();
-	std::cout << "Container " << containerName << (container.contains(point) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
-	if (container.contains(point))
-		std::cout << "At Index: " << container.find(point) << std::endl;
-
-	assert(container.find(point) == 0);
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {
@@ -127,7 +117,7 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType>& 
 	SHUFFLE(vec, rng);
 
 	container.resize(10, [&](const size_t index) {
-		return SObject{vec[index], containerName};
+		return TUnfurled<TType>::template create<SObject>(vec[index], containerName);
 	});
 	assert(container.getSize() == 10);
 
@@ -145,7 +135,7 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType>& 
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void transferTest(const std::string& containerName, TSequenceContainer<TType>& container) {
 
@@ -153,7 +143,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "Vector Transfer Test" << std::endl;
 
 		TVector<TType> from;
-		from.push(SObject{100, containerName});
+		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -181,7 +171,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "List Transfer Test" << std::endl;
 
 		TList<TType> from;
-		from.push(SObject{100, containerName});
+		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -208,15 +198,9 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void containerTest(const std::string& containerName, TSingleAssociativeContainer<TType>& container) {
-
-	TType obj = SObject{100, "Hello"};
-	TType obj2 = SObject{100, "Hello"};
-	container.push(std::move(obj));
-	auto& point = container.top();
-	std::cout << "Container " << containerName << (container.contains(point) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
 
 	std::vector<size_t> vec;
 	for (size_t i = 0; i < 10; ++i) {
@@ -231,7 +215,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	size_t i = 0;
 
 	container.resize(10, [&] {
-		auto object = SObject{vec[i], containerName};
+		auto object = TUnfurled<TType>::template create<SObject>(vec[i], containerName);
 		++i;
 		return object;
 	});
@@ -247,7 +231,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void transferTest(const std::string& containerName, TSingleAssociativeContainer<TType>& container) {
 
@@ -255,7 +239,7 @@ void transferTest(const std::string& containerName, TSingleAssociativeContainer<
 		std::cout << "Set Transfer Test" << std::endl;
 
 		TSet<TType> from;
-		from.push(SObject{100, containerName});
+		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -325,16 +309,12 @@ std::string enumToString(const MapEnum val) {
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void containerTest(const std::string& containerName, TAssociativeContainer<MapEnum, TType>& container) {
 
-	TType obj = SObject{100, "Hello"};
-	container.push(MapEnum::NONE, std::move(obj));
-	std::cout << "Container " << containerName << (container.contains(MapEnum::NONE) ? " DOES " : " DOES NOT ") << "Contain Object" << std::endl;
-
 	std::vector<size_t> vec;
-	for (size_t i = 1; i < 10; ++i) {
+	for (size_t i = 0; i < 10; ++i) {
 		vec.push_back(i);
 	}
 
@@ -346,7 +326,7 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	size_t i = 0;
 
 	container.resize(10, [&] {
-		auto pair = TPair<MapEnum, TType>{(MapEnum)vec[i], SObject{vec[i], containerName}};
+		auto pair = TPair<MapEnum, TType>{(MapEnum)vec[i], TUnfurled<TType>::template create<SObject>(vec[i], containerName)};
 		++i;
 		return pair;
 	});
@@ -367,7 +347,7 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 
 template <typename TType>
 #if CXX_VERSION >= 20
-requires std::is_base_of_v<Parent, typename TUnfurled<TType>::Type>
+requires std::is_base_of_v<Abstract, typename TUnfurled<TType>::Type>
 #endif
 void transferTest(const std::string& containerName, TAssociativeContainer<MapEnum, TType>& container) {
 
@@ -375,7 +355,7 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "Map Transfer Test" << std::endl;
 
 		TMap<MapEnum, TType> from;
-		from.push(MapEnum::NONE, SObject{100, containerName});
+		from.push(MapEnum::NONE, TUnfurled<TType>::template create<SObject>(100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -415,7 +395,8 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 #define DO_TEST(x) \
 	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
 	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
+	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
+	{ x<TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
 #define DO_ARRAY_TEST(x) \
 	{ x<Parent, 10> container; containerTest(#x, container); } \
@@ -425,12 +406,14 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 #define DO_ASSOCIATIVE_TEST(x) \
 	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
 	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
+	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
+	{ x<TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
 #define DO_MAP_TEST(x) \
 	{ x<MapEnum, Parent> container; containerTest(#x, container); transferTest(#x, container); } \
 	{ x<MapEnum, TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); }
+	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
+	{ x<MapEnum, TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
 int main() {
 
