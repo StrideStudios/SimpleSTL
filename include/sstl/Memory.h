@@ -8,7 +8,11 @@ struct TUnique {
 	TUnique(std::unique_ptr<TType>&& ptr) noexcept
 	: m_ptr(std::move(ptr)) {}
 
-	TUnique() = default;
+	// If not default constructible, default to nullptr, otherwise, let Args constructor handle it
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TUnique() noexcept {}
 
 	TUnique(nullptr_t) noexcept {}
 
@@ -158,7 +162,11 @@ struct TShared {
 	TShared(std::weak_ptr<TOtherType>& shared) noexcept
 	: m_ptr(shared) {}
 
-	TShared() = default;
+	// If not default constructible, default to nullptr, otherwise, let Args constructor handle it
+	template <typename TOtherType = TType,
+		std::enable_if_t<not std::is_default_constructible_v<TOtherType>, int> = 0
+	>
+	TShared() noexcept {}
 
 	TShared(nullptr_t) noexcept {}
 
