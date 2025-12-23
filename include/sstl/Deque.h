@@ -138,7 +138,7 @@ struct TDeque : TSequenceContainer<TType> {
 	}
 
 	virtual void pop() override {
-		pop(0);
+		pop(static_cast<size_t>(0));
 	}
 
 	virtual void pop(const size_t index) override {
@@ -147,6 +147,14 @@ struct TDeque : TSequenceContainer<TType> {
 
 	virtual void pop(const TType& obj) override {
 		ERASE(m_Container, obj);
+	}
+
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			ERASE(m_Container, obj, TUnfurled<TType>::get);
+		} else {
+			pop(*obj);
+		}
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {

@@ -160,6 +160,14 @@ struct TList : TSequenceContainer<TType> {
 		ERASE(m_Container, obj);
 	}
 
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			ERASE(m_Container, obj, TUnfurled<TType>::get);
+		} else {
+			pop(*obj);
+		}
+	}
+
 	// List transfer can use splicing
 	virtual void transfer(TSequenceContainer<TType>& otr, const size_t index) override {
 		if (auto otrList = dynamic_cast<TList*>(&otr)) {

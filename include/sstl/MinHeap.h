@@ -45,6 +45,15 @@ struct TMinHeap : TVector<TType> {
 		std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), MinCmp{});
 	}
 
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			ERASE(TVector<TType>::m_Container, obj, TUnfurled<TType>::get);
+			std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), MinCmp{});
+		} else {
+			pop(*obj);
+		}
+	}
+
 protected:
 
 	virtual void push(const size_t index, const TType& obj) override {

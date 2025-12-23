@@ -106,6 +106,14 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 		m_Container.erase(obj);
 	}
 
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			ERASE(m_Container, obj, TUnfurled<TType>::get);
+		} else {
+			pop(*obj);
+		}
+	}
+
 	virtual void transfer(TSingleAssociativeContainer<TType>& otr, TType& obj) override {
 		if (!this->contains(obj)) return;
 		auto itr = m_Container.extract(m_Container.find(obj));

@@ -175,10 +175,22 @@ struct TArray : TSequenceContainer<TType> {
 
 	virtual void pop(const TType& obj) override {
 		forEach([&](size_t index, TType& otr) {
-			if (obj == otr) {
+			if (otr == obj) {
 				m_IsPopulated[index] = false;
 			}
 		});
+	}
+
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			forEach([&](size_t index, TType& otr) {
+				if (otr.get() == obj) {
+					m_IsPopulated[index] = false;
+				}
+			});
+		} else {
+			pop(*obj);
+		}
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {

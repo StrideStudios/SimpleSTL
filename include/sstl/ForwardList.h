@@ -163,6 +163,15 @@ struct TForwardList : TSequenceContainer<TType> {
 		m_Size--;
 	}
 
+	virtual void pop(TUnfurled<TType>::Type* obj) override {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
+			m_Size--;
+		} else {
+			pop(*obj);
+		}
+	}
+
 	virtual void transfer(TSequenceContainer<TType>& otr, const size_t index) override {
 		// Forward List transfer can use splicing
 		if (auto otrList = dynamic_cast<TForwardList*>(&otr)) {

@@ -12,7 +12,7 @@
 
 #if CXX_VERSION >= 20
 #define FIND(c, x, ...) std::ranges::find(c, x, ##__VA_ARGS__)
-#define ERASE(c, x) c.erase(std::ranges::remove(c, x).begin(), c.end())
+#define ERASE(c, x, ...) c.erase(FIND(c, x, __VA_ARGS__))
 #define ASSOCIATIVE_CONTAINS(c, x) c.contains(x)
 #define DISTANCE(c, x, ...) std::ranges::distance(c.begin(), FIND(c, x, __VA_ARGS__))
 #define SHUFFLE(c, r) std::ranges::shuffle(c, r);
@@ -135,6 +135,9 @@ struct TSequenceContainer {
 		GUARANTEED
 	// Removes a certain object from the container
 	virtual void pop(const TType& obj)
+		GUARANTEED
+	// Version of pop that guarantees raw pointer input
+	virtual void pop(TUnfurled<TType>::Type* obj)
 		GUARANTEED
 
 	// Moves an object at index from this to container otr
@@ -335,6 +338,9 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 	// Removes an element from the container
 	virtual void pop(const TType&)
+		GUARANTEED
+	// Version of pop that guarantees raw pointer input is O(n), unlike normal pop, due to comparisons
+	virtual void pop(TUnfurled<TType>::Type* obj)
 		GUARANTEED
 
 	// Moves an object from this to container otr

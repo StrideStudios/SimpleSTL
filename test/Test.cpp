@@ -588,5 +588,18 @@ int main() {
 	TShared<FromHelper> frend{100, "Hey"};
 	frend->init();
 
+	TSet<TUnique<SObject>> setObjs;
+	setObjs.push(TUnique<SObject>{100, "Hello"});
+
+	SObject* ptr = setObjs.top().get();
+
+	std::cout << std::endl << std::endl;
+
+	std::cout << "Pre pop: ";
+	setObjs.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+	setObjs.pop(ptr);
+	std::cout << "Post pop: ";
+	setObjs.forEach([](const TUnique<SObject>& obj) { obj->print(); });
+
 	return 0;
 }

@@ -55,7 +55,7 @@ struct TStack : TDeque<TType> {
 	}
 
 	virtual void pop() override {
-		TDeque<TType>::pop(0);
+		TDeque<TType>::pop(static_cast<size_t>(0));
 	}
 
 	virtual void forEach(const std::function<void(size_t, TType&)>& func) override {
