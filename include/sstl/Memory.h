@@ -21,6 +21,13 @@ struct TUnique {
 		return *this;
 	}
 
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
+	explicit TUnique(TOtherType* ptr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
+	: m_ptr(ptr) {}
+
 	template <typename... TArgs>
 	TUnique(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
@@ -35,7 +42,8 @@ struct TUnique {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TUnique(TUnique<TOtherType>&& otr) noexcept
+	TUnique(TUnique<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
 	template <typename TOtherType = TType>
@@ -47,7 +55,8 @@ struct TUnique {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TUnique& operator=(TUnique<TOtherType>&& otr) noexcept {
+	TUnique& operator=(TUnique<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		this->m_ptr = std::move(otr.m_ptr);
 		return *this;
 	}
@@ -175,6 +184,13 @@ struct TShared {
 		return *this;
 	}
 
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
+	explicit TShared(TOtherType* ptr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
+	: m_ptr(ptr) {}
+
 	template <typename... TArgs>
 	TShared(TArgs&&... args)
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
@@ -199,7 +215,8 @@ struct TShared {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TShared(TShared<TOtherType>&& otr) noexcept
+	TShared(TShared<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
 	template <typename TOtherType = TType>
@@ -225,7 +242,8 @@ struct TShared {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TShared& operator=(TShared<TOtherType>&& otr) noexcept {
+	TShared& operator=(TShared<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		this->m_ptr = std::move(otr.m_ptr);
 		return *this;
 	}
@@ -371,7 +389,8 @@ struct TWeak {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TWeak(TWeak<TOtherType>&& otr) noexcept
+	TWeak(TWeak<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
 	template <typename TOtherType = TType>
@@ -397,7 +416,8 @@ struct TWeak {
 	template <typename TOtherType = TType,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	TWeak& operator=(TWeak<TOtherType>&& otr) noexcept {
+	TWeak& operator=(TWeak<TOtherType>&& otr)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		this->m_ptr = std::move(otr.m_ptr);
 		return *this;
 	}
@@ -575,7 +595,8 @@ struct TUnfurled {
 	template <typename TOtherType, typename... TArgs,
 		std::enable_if_t<std::is_convertible_v<TOtherType, TType>, int> = 0
 	>
-	static TType create(TArgs&&... args) {
+	static TType create(TArgs&&... args)
+	noexcept(std::is_nothrow_convertible_v<TOtherType, TType>) {
 		return TOtherType(std::forward<TArgs>(args)...);
 	}
 };
@@ -588,7 +609,8 @@ struct TUnfurled<TType*> {
 	template <typename TOtherType, typename... TArgs,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	static TType* create(TArgs&&... args) {
+	static TType* create(TArgs&&... args)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		return new TOtherType(std::forward<TArgs>(args)...);
 	}
 };
@@ -602,7 +624,8 @@ struct TUnfurled<TShared<TType>> {
 	template <typename TOtherType, typename... TArgs,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	static TShared<TType> create(TArgs&&... args) {
+	static TShared<TType> create(TArgs&&... args)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		return TShared<TOtherType>(std::forward<TArgs>(args)...);
 	}
 };
@@ -616,7 +639,8 @@ struct TUnfurled<TUnique<TType>> {
 	template <typename TOtherType, typename... TArgs,
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
-	static TUnique<TType> create(TArgs&&... args) {
+	static TUnique<TType> create(TArgs&&... args)
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
 		return TUnique<TOtherType>(std::forward<TArgs>(args)...);
 	}
 };
