@@ -33,10 +33,14 @@ struct TUnique {
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_unique<TType>(std::forward<TArgs>(args)...)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TUnique(const TUnique<TOtherType>&) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TUnique(TUnique<TOtherType>&) = delete;
 
 	template <typename TOtherType = TType,
@@ -46,10 +50,14 @@ struct TUnique {
 	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TUnique& operator=(const TUnique<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TUnique& operator=(TUnique<TOtherType>& otr) = delete;
 
 	template <typename TOtherType = TType,
@@ -196,10 +204,14 @@ struct TShared {
 	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
 	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TShared(const TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TShared(TShared<TOtherType>& otr) = delete;
 
 	/*
@@ -219,10 +231,14 @@ struct TShared {
 	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TShared& operator=(const TShared<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TShared& operator=(TShared<TOtherType>& otr) = delete;
 
 	/*
@@ -370,10 +386,14 @@ struct TWeak {
 		return *this;
 	}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TWeak(const TWeak<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TWeak(TWeak<TOtherType>& otr) = delete;
 
 	/*
@@ -393,10 +413,14 @@ struct TWeak {
 	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
 	: m_ptr(std::move(otr.m_ptr)) {}
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TWeak& operator=(const TWeak<TOtherType>& otr) = delete;
 
-	template <typename TOtherType = TType>
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
+	>
 	TWeak& operator=(TWeak<TOtherType>& otr) = delete;
 
 	/*
