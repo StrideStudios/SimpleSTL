@@ -123,7 +123,7 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType>& 
 
 	const size_t size = container.getSize();
 	for (size_t i = 0; i < size; ++i) {
-		getUnfurled(container.top())->print();
+		sstl::getUnfurled(container.top())->print();
 		container.pop();
 	}
 	std::cout << std::endl;
@@ -147,9 +147,9 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 
 		assert(from.getSize() == 1);
 
@@ -157,9 +157,9 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 
 		std::cout << "Post Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << std::endl;
 
 		assert(container.getSize() == 1);
@@ -175,9 +175,9 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 
 		assert(from.getSize() == 1);
 
@@ -185,9 +185,9 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 
 		std::cout << "Post Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](size_t index, const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << std::endl;
 
 		assert(container.getSize() == 1);
@@ -223,7 +223,7 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 
 	const size_t size = container.getSize();
 	for (size_t v = 0; v < size; ++v) {
-		getUnfurled(container.top())->print();
+		sstl::getUnfurled(container.top())->print();
 		container.pop();
 	}
 	std::cout << std::endl;
@@ -243,9 +243,9 @@ void transferTest(const std::string& containerName, TSingleAssociativeContainer<
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](const TType& obb) {sstl::getUnfurled(obb)->print();});
 
 		assert(from.getSize() == 1);
 
@@ -253,9 +253,9 @@ void transferTest(const std::string& containerName, TSingleAssociativeContainer<
 
 		std::cout << "Post Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
-		from.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		from.forEach([](const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << "to:" << std::endl;
-		container.forEach([](const TType& obb) {getUnfurled(obb)->print();});
+		container.forEach([](const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << std::endl;
 
 		assert(container.getSize() == 1);
@@ -335,7 +335,7 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	const size_t size = container.getSize();
 	for (size_t v = 0; v < size; ++v) {
 		MapEnum enm = (MapEnum)v;
-		if (auto object = getUnfurled(container.get(enm))) {
+		if (auto object = sstl::getUnfurled(container.get(enm))) {
 			std::cout << "Key: " << enumToString(enm) << " ";
 			object->print();
 			container.pop(enm);
@@ -361,12 +361,12 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "from:" << std::endl;
 		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
 			std::cout << "Key: " << enumToString(obb.key()) << " ";
-			getUnfurled(obb.value())->print();
+			sstl::getUnfurled(obb.value())->print();
 		});
 		std::cout << "to:" << std::endl;
 		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
 			std::cout << "Key: " << enumToString(obb.key()) << " ";
-			getUnfurled(obb.value())->print();
+			sstl::getUnfurled(obb.value())->print();
 		});
 
 		assert(from.getSize() == 1);
@@ -377,12 +377,12 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "from:" << std::endl;
 		from.forEach([](const TPair<MapEnum, const TType&>& obb) {
 			std::cout << "Key: " << enumToString(obb.key()) << " ";
-			getUnfurled(obb.value())->print();
+			sstl::getUnfurled(obb.value())->print();
 		});
 		std::cout << "to:" << std::endl;
 		container.forEach([](const TPair<MapEnum, const TType&>& obb) {
 			std::cout << "Key: " << enumToString(obb.key()) << " ";
-			getUnfurled(obb.value())->print();
+			sstl::getUnfurled(obb.value())->print();
 		});
 		std::cout << std::endl;
 

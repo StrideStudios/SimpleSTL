@@ -656,36 +656,38 @@ struct TUnfurled<TWeak<TType>> {
  * Determine whether TType is a managed pointer or not
  */
 
-template <typename TType>
-constexpr bool is_managed_v = TUnfurled<TType>::isManaged;
+namespace sstl {
+	template <typename TType>
+	constexpr bool is_managed_v = TUnfurled<TType>::isManaged;
 
-template <typename TType>
-struct is_managed : std::bool_constant<is_managed_v<TType>> {};
+	template <typename TType>
+	struct is_managed : std::bool_constant<is_managed_v<TType>> {};
 
-template <typename TType>
-TType* getUnfurled(TType* type) {
-	return type;
-}
-
-template <typename TType>
-const TType* getUnfurled(const TType* type) {
-	return type;
-}
-
-template <typename TType>
-TUnfurled<TType>::Type* getUnfurled(TType& type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type.get();
-	} else {
-		return &type;
+	template <typename TType>
+	TType* getUnfurled(TType* type) {
+		return type;
 	}
-}
 
-template <typename TType>
-const TUnfurled<TType>::Type* getUnfurled(const TType& type) {
-	if constexpr (TUnfurled<TType>::isManaged) {
-		return type.get();
-	} else {
-		return &type;
+	template <typename TType>
+	const TType* getUnfurled(const TType* type) {
+		return type;
+	}
+
+	template <typename TType>
+	TUnfurled<TType>::Type* getUnfurled(TType& type) {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			return type.get();
+		} else {
+			return &type;
+		}
+	}
+
+	template <typename TType>
+	const TUnfurled<TType>::Type* getUnfurled(const TType& type) {
+		if constexpr (TUnfurled<TType>::isManaged) {
+			return type.get();
+		} else {
+			return &type;
+		}
 	}
 }
