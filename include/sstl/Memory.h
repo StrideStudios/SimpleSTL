@@ -29,6 +29,9 @@ namespace sstl {
 			TType,
 			TArgs...
 		> : std::true_type {};
+
+	template <typename TType, typename... TArgs>
+	constexpr bool is_initializable_v = is_initializable<TType, TArgs...>::value;
 	#endif
 #endif
 
