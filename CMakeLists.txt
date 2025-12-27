@@ -10,6 +10,8 @@ project(
 )
 
 option(SIMPLESTL_TEST "Enable Testing SimpleSTL Features" ${PROJECT_IS_TOP_LEVEL})
+option(SIMPLESTL_INIT "Enable The auto init function call" On)
+option(SIMPLESTL_DESTROY "Enable The auto destroy function call" On)
 
 add_library(SimpleSTL INTERFACE
         # Base Classes
@@ -59,6 +61,13 @@ message(STATUS "SimpleSTL: Using CXX Version ${SimpleSTL_CXX_STANDARD}")
 
 # Create Macro with CXX Version
 target_compile_definitions(SimpleSTL INTERFACE CXX_VERSION=${SimpleSTL_CXX_STANDARD})
+
+if(SIMPLESTL_INIT)
+    target_compile_definitions(SimpleSTL INTERFACE SIMPLESTL_INIT)
+endif()
+if(SIMPLESTL_DESTROY)
+    target_compile_definitions(SimpleSTL INTERFACE SIMPLESTL_DESTROY)
+endif()
 
 # Ensure target is compiled with CXX Version
 target_compile_features(SimpleSTL INTERFACE "cxx_std_${SimpleSTL_CXX_STANDARD}")

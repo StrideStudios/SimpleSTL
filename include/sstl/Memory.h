@@ -3,52 +3,65 @@
 #include <memory>
 
 namespace sstl {
-#if CXX_VERSION >= 20
+#ifndef SIMPLESTL_INIT
 	template <typename TType, typename... TArgs>
-	concept is_initializable_v =
-    requires(TType& obj, TArgs&&... args) {
-        obj.init(std::forward<TArgs>(args)...);
-    };
+	constexpr bool is_initializable_v = false;
 
 	template <typename TType, typename... TArgs>
 	struct is_initializable : std::bool_constant<is_initializable_v<TType, TArgs...>> {};
-
-	template <typename TType>
-	concept is_destroyable =
-	requires(TType& obj) {
-		obj.destroy();
-	};
-
-	template <typename TType>
-	constexpr bool is_destroyable_v = is_destroyable<TType>;
 #else
-	template <typename, typename TType, typename... TArgs>
-	struct is_initializable : std::false_type {};
+	#if CXX_VERSION >= 20
+		template <typename TType, typename... TArgs>
+		concept is_initializable_v =
+		requires(TType& obj, TArgs&&... args) {
+			obj.init(std::forward<TArgs>(args)...);
+		};
 
-	template <typename TType, typename... TArgs>
-	struct is_initializable<
-		std::void_t<decltype(std::declval<TType&>().init(std::declval<TArgs>()...))>,
-		TType,
-		TArgs...
-	> : std::true_type {};
+		template <typename TType, typename... TArgs>
+		struct is_initializable : std::bool_constant<is_initializable_v<TType, TArgs...>> {};
+	#else
+		template <typename, typename TType, typename... TArgs>
+		struct is_initializable : std::false_type {};
 
-	template <typename TType, typename... TArgs>
-	constexpr bool is_initializable_v = is_initializable<void, TType, TArgs...>::value;
-
-	template <typename TType, typename = void>
-	struct is_destroyable : std::false_type {};
-
-	template <typename TType>
-	struct is_destroyable<
-		std::void_t<decltype(std::declval<TType&>().destroy())>,
-		TType
-	> : std::true_type {};
-
-	template <typename TType>
-	constexpr bool is_destroyable_v = is_destroyable<TType>::value;
-
+		template <typename TType, typename... TArgs>
+		struct is_initializable<
+			std::void_t<decltype(std::declval<TType&>().init(std::declval<TArgs>()...))>,
+			TType,
+			TArgs...
+		> : std::true_type {};
+	#endif
 #endif
 
+#ifndef SIMPLESTL_DESTROY
+	template <typename TType>
+	constexpr bool is_destroyable_v = false;
+
+	template <typename TType>
+	struct is_destroyable : std::bool_constant<is_destroyable_v<TType>> {};
+#else
+	#if CXX_VERSION >= 20
+		template <typename TType>
+		concept is_destroyable =
+		requires(TType& obj) {
+			obj.destroy();
+		};
+
+		template <typename TType>
+		constexpr bool is_destroyable_v = is_destroyable<TType>;
+	#else
+		template <typename TType, typename = void>
+		struct is_destroyable : std::false_type {};
+
+		template <typename TType>
+		struct is_destroyable<
+			std::void_t<decltype(std::declval<TType&>().destroy())>,
+			TType
+		> : std::true_type {};
+
+		template <typename TType>
+		constexpr bool is_destroyable_v = is_destroyable<TType>::value;
+	#endif
+#endif
 	template <typename TType>
 	struct deleter {
 		constexpr deleter() noexcept = default;
@@ -99,11 +112,13 @@ struct TUnique {
 	template <typename... TArgs,
 		std::enable_if_t<
 			std::conjunction_v<
-				std::negation<std::is_same<std::decay_t<TArgs>, TUnique>>...
+				std::negation<std::is_null_pointer<std::decay_t<TArgs>>>...,
+				std::negation<std::is_same<std::decay_t<TArgs>, TUnique>>...,
+				std::is_constructible<TType, TArgs...>
 			>,
 			int> = 0
 	>
-	_CONSTEXPR23 TUnique(TArgs&&... args) {
+	_CONSTEXPR23 TUnique(TArgs&&... args) noexcept {
 		if constexpr (sstl::is_initializable_v<TType, TArgs...>) {
 			m_ptr = std::unique_ptr<TType, sstl::deleter<TType>>{new TType(), sstl::deleter<TType>()};
 			m_ptr->init(std::forward<TArgs>(args)...);
@@ -299,11 +314,13 @@ struct TShared {
 	template <typename... TArgs,
 		std::enable_if_t<
 			std::conjunction_v<
-				std::negation<std::is_same<std::decay_t<TArgs>, TShared>>...
+				std::negation<std::is_null_pointer<std::decay_t<TArgs>>>...,
+				std::negation<std::is_same<std::decay_t<TArgs>, TShared>>...,
+				std::is_constructible<TType, TArgs...>
 			>,
 			int> = 0
 	>
-	_CONSTEXPR23 TShared(TArgs&&... args) {
+	_CONSTEXPR23 TShared(TArgs&&... args) noexcept {
 		if constexpr (sstl::is_initializable_v<TType, TArgs...>) {
 			m_ptr = std::shared_ptr<TType>{new TType(), sstl::deleter<TType>()};
 			m_ptr->init(std::forward<TArgs>(args)...);
@@ -690,12 +707,12 @@ private:
 
 template <typename TType>
 template <typename TOtherType>
-TShared<TType>::TShared(const TWeak<TOtherType>& shared) noexcept
+_CONSTEXPR23 TShared<TType>::TShared(const TWeak<TOtherType>& shared) noexcept
 	: m_ptr(shared.m_ptr) {}
 
 template <typename TType>
 template <typename TOtherType>
-TShared<TType>::TShared(TWeak<TOtherType>& shared) noexcept
+_CONSTEXPR23 TShared<TType>::TShared(TWeak<TOtherType>& shared) noexcept
 : m_ptr(shared.m_ptr) {}
 
 template <typename TType>
@@ -755,24 +772,6 @@ noexcept(std::is_nothrow_convertible_v<TOtherType, TType>) {
 noexcept {
 #endif
 		return TOtherType(std::forward<TArgs>(args)...);
-	}
-};
-
-template <typename TType>
-struct TUnfurled<TType*> {
-	using Type = TType;
-	constexpr static bool isManaged = false;
-
-	template <typename TOtherType = TType, typename... TArgs,
-		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
-	>
-	constexpr static TType* create(TArgs&&... args)
-#if CXX_VERSION >= 20
-noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
-#else
-noexcept {
-#endif
-		return new TOtherType(std::forward<TArgs>(args)...);
 	}
 };
 

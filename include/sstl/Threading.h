@@ -29,9 +29,16 @@ public:
 
 	TThreadSafe() noexcept {}
 
-	template <typename... TArgs>
-	TThreadSafe(TArgs&&... args)
-	noexcept(std::is_nothrow_constructible_v<TType, TArgs...>)
+	template <typename... TArgs,
+		std::enable_if_t<
+			std::conjunction_v<
+				std::negation<std::is_null_pointer<std::decay_t<TArgs>>>...,
+				std::negation<std::is_same<std::decay_t<TArgs>, TThreadSafe>>...,
+				std::is_constructible<TType, TArgs...>
+			>,
+			int> = 0
+	>
+	TThreadSafe(TArgs&&... args) noexcept
 	: m_obj(std::forward<TArgs>(args)...) {}
 
 	template <typename TOtherType = TType,

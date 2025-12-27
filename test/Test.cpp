@@ -66,7 +66,9 @@ struct Parent : Abstract{
 struct SObject : Parent {
 
 	SObject() = default;
-	SObject(const size_t id, const std::string name): Parent(id), name(std::move(name)) {}
+	SObject(const size_t id, const std::string name): Parent(id), name(std::move(name)) {
+		std::cout << "SOBJECT MAKE" << std::endl;
+	}
 
 	void init(const size_t inId, const std::string inName) {
 		id = inId;
@@ -101,16 +103,16 @@ struct TestSObject : Parent {
 
 	TestSObject() = default;
 	TestSObject(const size_t id): Parent(id) {
-		std::cout << "SOBJECT MAKE" << std::endl;
+		std::cout << "TESTSOBJECT MAKE" << std::endl;
 	}
 
 	void init(const std::string inName) {
 		name = inName;
-		std::cout << "SOBJECT INIT" << std::endl;
+		std::cout << "TESTSOBJECT INIT" << std::endl;
 	}
 
 	void destroy() const {
-		std::cout << "SOBJECT " << name << " DESTROY" << std::endl;
+		std::cout << "TESTSOBJECT " << name << " DESTROY" << std::endl;
 	}
 
 	std::string name = "None";
@@ -487,7 +489,7 @@ T make(std::index_sequence<Ns...>, TArgs&&... args) {
 	// This is the tuple we use to test slicing
 	using Tuple = std::tuple<TArgs&&...>;
 
-	// number of Ctor Args to try and total size of arguements
+	// number of Ctor Args to try and total size of arguments
 	constexpr size_t ctorArgs = sizeof...(Ns);
 	constexpr size_t tupSize = sizeof...(TArgs);
 
@@ -495,7 +497,7 @@ T make(std::index_sequence<Ns...>, TArgs&&... args) {
 	if constexpr (ctorArgs <= 0) {
 		static_assert(0 < sizeof(T), "No such constructor!");
 	// Test if the underlying type is constructible with the elements in Tuple
-	} else if constexpr (std::is_constructible_v<typename TUnfurled<T>::Type, std::tuple_element_t<Ns, Tuple>...>) {
+	} else if constexpr (std::is_constructible_v<T, std::tuple_element_t<Ns, Tuple>...>) {
 		return make_impl<T>(
 				std::make_index_sequence<ctorArgs>{},
 				std::make_index_sequence<tupSize - ctorArgs>{},
@@ -531,6 +533,19 @@ int main() {
 
 	const auto obj5 = make<TUnique<TestSObject>>(std::move(obj4));
 	obj5->print();
+
+	std::cout << "Begin SObject" << std::endl;
+
+	// Prefers constructor for obvious reasons
+	const auto obj6 = make<SObject>(6000, "Hey6");
+	obj6.print();
+
+	auto obj7 = make<TShared<SObject>>(7000, "Hey7");
+	obj7->print();
+
+	const auto obj8 = make<TShared<SObject>>(obj7);
+	obj7->print();
+	obj8->print();
 
 	return 0;
 }
