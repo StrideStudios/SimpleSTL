@@ -111,6 +111,12 @@ struct TestSObject : Parent {
 		std::cout << "TESTSOBJECT INIT" << std::endl;
 	}
 
+	void init(const std::string inName, const size_t inId) {
+		name = inName;
+		id = inId;
+		std::cout << "TESTSOBJECT INIT 2" << std::endl;
+	}
+
 	void destroy() const {
 		std::cout << "TESTSOBJECT " << name << " DESTROY" << std::endl;
 	}
@@ -494,7 +500,7 @@ T make(std::index_sequence<Ns...>, TArgs&&... args) {
 	constexpr size_t tupSize = sizeof...(TArgs);
 
 	// We have run out of args, this is an invalid call
-	if constexpr (ctorArgs <= 0) {
+	if constexpr (ctorArgs < 0) {
 		static_assert(0 < sizeof(T), "No such constructor!");
 	// Test if the underlying type is constructible with the elements in Tuple
 	} else if constexpr (std::is_constructible_v<T, std::tuple_element_t<Ns, Tuple>...>) {
@@ -519,7 +525,7 @@ int main() {
 	const auto obj = make<TestSObject>(100, "Hey");
 	obj.print();
 
-	const auto obj2 = make<TestSObject>(1000, "Hey2");
+	const auto obj2 = make<TestSObject>("Hey2", 1000);
 	obj2.print();
 
 	const auto obj3 = make<TShared<TestSObject>>(3000, "Hey3");
