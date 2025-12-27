@@ -97,6 +97,41 @@ struct SObject : Parent {
 	}
 };
 
+struct TestSObject : Parent {
+
+	TestSObject() = default;
+	TestSObject(const size_t id): Parent(id) {
+		std::cout << "SOBJECT MAKE" << std::endl;
+	}
+
+	void init(const std::string inName) {
+		name = inName;
+		std::cout << "SOBJECT INIT" << std::endl;
+	}
+
+	void destroy() const {
+		std::cout << "SOBJECT " << name << " DESTROY" << std::endl;
+	}
+
+	std::string name = "None";
+
+	virtual void print() const override {
+		std::cout << "ID: " << id << " Name: " << name << std::endl;
+	}
+
+	friend bool operator<(const TestSObject& fst, const TestSObject& snd) {
+		return fst.id < snd.id;
+	}
+
+	friend bool operator==(const TestSObject& fst, const TestSObject& snd) {
+		return fst.id == snd.id;
+	}
+
+	friend size_t getHash(const TestSObject& obj) {
+		return obj.id;
+	}
+};
+
 template <typename TType>
 struct Test {
 
@@ -425,6 +460,59 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
 	{ x<MapEnum, TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
+template<typename T, typename... TArgs, std::size_t... CtorIdx, std::size_t... InitIdx>
+T make_impl(
+	std::index_sequence<CtorIdx...>,
+	std::index_sequence<InitIdx...>,
+	TArgs&&... args
+) {
+	// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
+	auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
+	using TupleType = decltype(argsTuple);
+
+	// Create the object by getting the arguments associated with it, auto forwards because of argsTuple
+	T obj(std::get<CtorIdx>(std::forward<TupleType>(argsTuple))...);
+
+	// The offset is the last element of CtorIdx, the same as it's size
+	constexpr size_t initOffset = sizeof...(CtorIdx);
+	if constexpr (sstl::is_initializable_v<typename TUnfurled<T>::Type, std::tuple_element_t<initOffset + InitIdx, TupleType>...>) {
+		sstl::getUnfurled(obj)->init(std::get<initOffset + InitIdx>(std::forward<TupleType>(argsTuple))...);
+	}
+	return obj;
+}
+
+// Try all possible prefix sizes (largest first)
+template<typename T, typename... TArgs, std::size_t... Ns>
+T make(std::index_sequence<Ns...>, TArgs&&... args) {
+	// This is the tuple we use to test slicing
+	using Tuple = std::tuple<TArgs&&...>;
+
+	// number of Ctor Args to try and total size of arguements
+	constexpr size_t ctorArgs = sizeof...(Ns);
+	constexpr size_t tupSize = sizeof...(TArgs);
+
+	// We have run out of args, this is an invalid call
+	if constexpr (ctorArgs <= 0) {
+		static_assert(0 < sizeof(T), "No such constructor!");
+	// Test if the underlying type is constructible with the elements in Tuple
+	} else if constexpr (std::is_constructible_v<typename TUnfurled<T>::Type, std::tuple_element_t<Ns, Tuple>...>) {
+		return make_impl<T>(
+				std::make_index_sequence<ctorArgs>{},
+				std::make_index_sequence<tupSize - ctorArgs>{},
+				std::forward<TArgs>(args)...
+			);
+	} else {
+		// Recursive call if we still have args left to try
+		return make<T>(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
+	}
+}
+
+template<typename T, typename... Args>
+T make(Args&&... args) {
+	// Essentially forward the arguements and create a sequence with the number of arguements
+	return make<T>(std::make_index_sequence<sizeof...(Args)>{}, std::forward<Args>(args)...);
+}
+
 int main() {
 	const auto obj = make<TestSObject>(100, "Hey");
 	obj.print();
@@ -438,7 +526,7 @@ int main() {
 	const auto obj35 = make<TShared<TestSObject>>(obj3);
 	obj35->print();
 
-	const auto obj4 = make<TUnique<TestSObject>>(5000, "Hey5");
+	auto obj4 = make<TUnique<TestSObject>>(5000, "Hey5");
 	obj4->print();
 
 	const auto obj5 = make<TUnique<TestSObject>>(std::move(obj4));

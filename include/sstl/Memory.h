@@ -96,7 +96,13 @@ struct TUnique {
 #endif
 	: m_ptr(ptr) {}
 
-	template <typename... TArgs>
+	template <typename... TArgs,
+		std::enable_if_t<
+			std::conjunction_v<
+				std::negation<std::is_same<std::decay_t<TArgs>, TUnique>>...
+			>,
+			int> = 0
+	>
 	_CONSTEXPR23 TUnique(TArgs&&... args) {
 		if constexpr (sstl::is_initializable_v<TType, TArgs...>) {
 			m_ptr = std::unique_ptr<TType, sstl::deleter<TType>>{new TType(), sstl::deleter<TType>()};
@@ -290,7 +296,13 @@ struct TShared {
 	: m_ptr(ptr) {}
 
 	// prefer init because SharedFrom works there
-	template <typename... TArgs>
+	template <typename... TArgs,
+		std::enable_if_t<
+			std::conjunction_v<
+				std::negation<std::is_same<std::decay_t<TArgs>, TShared>>...
+			>,
+			int> = 0
+	>
 	_CONSTEXPR23 TShared(TArgs&&... args) {
 		if constexpr (sstl::is_initializable_v<TType, TArgs...>) {
 			m_ptr = std::shared_ptr<TType>{new TType(), sstl::deleter<TType>()};
