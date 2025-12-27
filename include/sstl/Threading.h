@@ -9,7 +9,6 @@
 // https://stackoverflow.com/questions/16859519/how-to-wrap-calls-of-every-member-function-of-a-class-in-c11
 template <typename TType>
 class TThreadSafe {
-
 	template<typename TParent, typename TMutex>
 	struct safe_lock : std::lock_guard<TMutex> {
 
@@ -48,7 +47,11 @@ public:
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
 	TThreadSafe(TThreadSafe<TOtherType>& otr)
+#if CXX_VERSION >= 20
 	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
+#else
+	noexcept
+#endif
 	: TThreadSafe(otr.m_obj) {}
 
 	TThreadSafe(TThreadSafe& otr) noexcept
@@ -58,7 +61,11 @@ public:
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
 	TThreadSafe(TThreadSafe<TOtherType>&& otr)
+#if CXX_VERSION >= 20
 	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>)
+#else
+	noexcept
+#endif
 	: TThreadSafe(std::move(otr.m_obj)) {}
 
 	TThreadSafe(TThreadSafe&& otr) noexcept
@@ -68,7 +75,11 @@ public:
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
 	TThreadSafe& operator=(const TThreadSafe<TOtherType>& otr)
-	noexcept(std::is_nothrow_convertible_v<TType*, TOtherType*>) {
+#if CXX_VERSION >= 20
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
+#else
+	noexcept {
+#endif
 		this->m_obj = otr.m_obj;
 		return *this;
 	}
@@ -82,7 +93,11 @@ public:
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>& otr)
-	noexcept(std::is_nothrow_convertible_v<TType*, TOtherType*>) {
+#if CXX_VERSION >= 20
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
+#else
+	noexcept {
+#endif
 		this->m_obj = otr.m_obj;
 		return *this;
 	}
@@ -96,7 +111,11 @@ public:
 		std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0
 	>
 	TThreadSafe& operator=(TThreadSafe<TOtherType>&& otr)
-	noexcept(std::is_nothrow_convertible_v<TType*, TOtherType*>) {
+#if CXX_VERSION >= 20
+	noexcept(std::is_nothrow_convertible_v<TOtherType*, TType*>) {
+#else
+	noexcept {
+#endif
 		this->m_obj = std::move(otr.m_obj);
 		return *this;
 	}

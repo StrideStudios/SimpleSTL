@@ -63,10 +63,20 @@ struct Parent : Abstract{
 	}
 };
 
-struct SObject : Parent{
+struct SObject : Parent {
 
 	SObject() = default;
-	SObject(const size_t id, std::string name): Parent(id), name(std::move(name)) {}
+	SObject(const size_t id, const std::string name): Parent(id), name(std::move(name)) {}
+
+	void init(const size_t inId, const std::string inName) {
+		id = inId;
+		name = inName;
+		std::cout << "SOBJECT INIT" << std::endl;
+	}
+
+	void destroy() const {
+		std::cout << "SOBJECT " << name << " DESTROY" << std::endl;
+	}
 
 	std::string name = "None";
 
@@ -416,6 +426,28 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 	{ x<MapEnum, TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
 int main() {
+	const auto obj = make<TestSObject>(100, "Hey");
+	obj.print();
+
+	const auto obj2 = make<TestSObject>(1000, "Hey2");
+	obj2.print();
+
+	const auto obj3 = make<TShared<TestSObject>>(3000, "Hey3");
+	obj3->print();
+
+	const auto obj35 = make<TShared<TestSObject>>(obj3);
+	obj35->print();
+
+	const auto obj4 = make<TUnique<TestSObject>>(5000, "Hey5");
+	obj4->print();
+
+	const auto obj5 = make<TUnique<TestSObject>>(std::move(obj4));
+	obj5->print();
+
+	return 0;
+}
+
+int main2() {
 
 	auto lamb = [](TUnique<Parent>& out) {
 		out = TUnique<SObject>{200, "Hello"};
@@ -482,22 +514,14 @@ int main() {
 	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100, "Hey"});
 
 	TUnique<Abstract> abb = TUnique<SObject>{100, "Hey"};
-	TUnique<SObject> abb2 = SObject{100, "Hey"};
-
-	TPriorityMap<int, std::reference_wrapper<Abstract>> map;
-	std::map<int, std::reference_wrapper<Abstract>> map2;
-	std::vector<std::reference_wrapper<Abstract>> vec2;
-	TVector<std::reference_wrapper<Abstract>> vec22;
-
-	SObject obb = SObject{100, "Hey"};
-	vec2.push_back(obb);
+	TUnique<SObject> abb2 = TUnique<SObject>{100, "Hey"};
 
 	std::vector<TUnique<SObject>> m_Container;
-	m_Container.emplace_back(SObject{100, "Hello unique"});
+	m_Container.emplace_back(TUnique<SObject>{100, "Hello unique"});
 
 	{
 		TVector<TUnique<SObject>> vec;
-		vec.push(SObject{100, "Hello unique"});
+		vec.push(TUnique<SObject>{100, "Hello unique"});
 		SObject* obb = vec.top().get();
 
 		if (vec.contains(obb)) {
@@ -507,7 +531,7 @@ int main() {
 
 	{
 		TSet<TUnique<SObject>> set;
-		set.push(SObject{100, "Hello unique"});
+		set.push(TUnique<SObject>{100, "Hello unique"});
 		SObject* obb = set.top().get();
 
 		if (set.contains(obb)) {

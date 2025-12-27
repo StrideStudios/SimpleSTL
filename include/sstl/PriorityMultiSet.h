@@ -22,7 +22,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		return ASSOCIATIVE_CONTAINS(m_Container, obj);
 	}
 
-	virtual bool contains(TUnfurled<TType>::Type* obj) const override {
+	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -102,7 +102,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		m_Container.erase(obj);
 	}
 
-	virtual void pop(TUnfurled<TType>::Type* obj) override {
+	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			ERASE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -121,7 +121,7 @@ struct TPriorityMultiSet : TSingleAssociativeContainer<TType> {
 		}
 	}
 
-	virtual void transfer(TSingleAssociativeContainer<TType>& otr, TUnfurled<TType>::Type* obj) override {
+	virtual void transfer(TSingleAssociativeContainer<TType>& otr, typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			if (!this->contains(obj)) return;
 			auto itr = m_Container.extract(FIND(m_Container, obj, TUnfurled<TType>::get));

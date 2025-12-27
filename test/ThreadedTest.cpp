@@ -30,10 +30,15 @@ struct Parent {
 	int id = 0;
 };
 
-struct SObject : Parent{
+struct SObject : Parent {
 
 	SObject() = default;
-	SObject(const size_t id, std::string name): Parent(id), name(std::move(name)) {}
+
+	void init(size_t inId, std::string inName) {
+		id = inId;
+		name = inName;
+		std::cout << "INIT SOBJECT" << std::endl;
+	}
 
 	std::string name = "None";
 
@@ -61,12 +66,12 @@ int main() {
 	char c = 'y';
 	while (c != 'n') {
 		std::thread threadOne([&] {
-			vec->push(SObject{100, "Thread One"});
+			vec->push(TUnique<SObject>{100, "Thread One"});
 			vec->top()->print();
 			//vec->doFor(0, [](const TUnique<SObject>& obj) { obj->print(); });
 			vec->pop(static_cast<size_t>(0));
 		});
-		vec->push(SObject{101, "Thread Two"});
+		vec->push(TUnique<SObject>{101, "Thread Two"});
 		vec->top()->print();
 		//vec->doFor(0, [](TUnique<SObject>& obj) { obj->print(); });
 		vec->pop(static_cast<size_t>(0));

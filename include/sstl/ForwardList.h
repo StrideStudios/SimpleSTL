@@ -22,7 +22,7 @@ struct TForwardList : TSequenceContainer<TType> {
 		return CONTAINS(m_Container, obj);
 	}
 
-	virtual bool contains(TUnfurled<TType>::Type* obj) const override {
+	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -34,7 +34,7 @@ struct TForwardList : TSequenceContainer<TType> {
 		return DISTANCE(m_Container, obj);
 	}
 
-	virtual size_t find(TUnfurled<TType>::Type* obj) const override {
+	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -163,7 +163,7 @@ struct TForwardList : TSequenceContainer<TType> {
 		m_Size--;
 	}
 
-	virtual void pop(TUnfurled<TType>::Type* obj) override {
+	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
 			m_Size--;

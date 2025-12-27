@@ -18,9 +18,9 @@
 #define SHUFFLE(c, r) std::ranges::shuffle(c, r);
 #else
 #define FIND(c, x, ...) std::find(c.begin(), c.end(), x)
-#define ERASE(c, x) c.erase(std::remove(c.begin(), c.end(), x), c.end())
+#define ERASE(c, x, ...) c.erase(FIND(c, x))
 #define ASSOCIATIVE_CONTAINS(c, x) c.find(x) != c.end()
-#define DISTANCE(c, x, ...) std::distance(c.begin(), FIND(find, c, x))
+#define DISTANCE(c, x, ...) std::distance(c.begin(), FIND(c, x))
 #define SHUFFLE(c, r) std::shuffle(c.begin(), c.end(), r);
 #endif
 
@@ -65,7 +65,7 @@ struct TSequenceContainer {
 		GUARANTEED
 
 	// Version of contains that guarantees raw pointer input
-	virtual bool contains(TUnfurled<TType>::Type* obj) const
+	virtual bool contains(typename TUnfurled<TType>::Type* obj) const
 		GUARANTEED
 
 	// Find a certain element in the container
@@ -73,7 +73,7 @@ struct TSequenceContainer {
 		GUARANTEED
 
 	// Version of contains that guarantees raw pointer input
-	virtual size_t find(TUnfurled<TType>::Type* obj) const
+	virtual size_t find(typename TUnfurled<TType>::Type* obj) const
 		GUARANTEED
 
 	// Get an element at a specified index
@@ -137,7 +137,7 @@ struct TSequenceContainer {
 	virtual void pop(const TType& obj)
 		GUARANTEED
 	// Version of pop that guarantees raw pointer input
-	virtual void pop(TUnfurled<TType>::Type* obj)
+	virtual void pop(typename TUnfurled<TType>::Type* obj)
 		GUARANTEED
 
 	// Moves an object at index from this to container otr
@@ -297,7 +297,7 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 
 	// Version of contains that guarantees raw pointer input
-	virtual bool contains(TUnfurled<TType>::Type* obj) const
+	virtual bool contains(typename TUnfurled<TType>::Type* obj) const
 		GUARANTEED
 
 	// Fills container with n defaulted elements
@@ -340,7 +340,7 @@ struct TSingleAssociativeContainer {
 	virtual void pop(const TType&)
 		GUARANTEED
 	// Version of pop that guarantees raw pointer input, is O(n), unlike normal pop, due to comparisons
-	virtual void pop(TUnfurled<TType>::Type* obj)
+	virtual void pop(typename TUnfurled<TType>::Type* obj)
 		GUARANTEED
 
 	// Moves an object from this to container otr
@@ -349,7 +349,7 @@ struct TSingleAssociativeContainer {
 		GUARANTEED
 
 	// Version of transfer that guarantees raw pointer input
-	virtual void transfer(TSingleAssociativeContainer& otr, TUnfurled<TType>::Type* obj)
+	virtual void transfer(TSingleAssociativeContainer& otr, typename TUnfurled<TType>::Type* obj)
 		NOT_GUARANTEED
 
 	// Iterates through each element

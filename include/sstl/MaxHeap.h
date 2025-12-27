@@ -45,7 +45,7 @@ struct TMaxHeap : TVector<TType> {
 		std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 	}
 
-	virtual void pop(TUnfurled<TType>::Type* obj) override {
+	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			ERASE(TVector<TType>::m_Container, obj, TUnfurled<TType>::get);
 			std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
