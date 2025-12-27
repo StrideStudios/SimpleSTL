@@ -15,7 +15,9 @@ struct TPrioritySet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual const TType& bottom() const override {
-		return *m_Container.end();
+		auto itr = m_Container.end();
+		--itr;
+		return *itr;
 	}
 
 	virtual bool contains(const TType& obj) const override {

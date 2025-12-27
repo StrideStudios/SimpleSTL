@@ -21,137 +21,7 @@
 #include "sstl/MultiMap.h"
 #include "sstl/PriorityMultiMap.h"
 
-struct Abstract {
-	Abstract() = default;
-	Abstract(const size_t id): id(id) {}
-	virtual ~Abstract() = default;
-	virtual void print() const = 0;
-
-	friend bool operator<(const Abstract& fst, const Abstract& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const Abstract& fst, const Abstract& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const Abstract& obj) {
-		return obj.id;
-	}
-
-	int id = 0;
-};
-
-struct Parent : Abstract{
-	Parent() = default;
-	Parent(const size_t id): Abstract(id) {}
-	virtual ~Parent() = default;
-	virtual void print() const {
-		std::cout << "ID: " << id << std::endl;
-	}
-
-	friend bool operator<(const Parent& fst, const Parent& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const Parent& fst, const Parent& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const Parent& obj) {
-		return obj.id;
-	}
-};
-
-struct SObject : Parent {
-
-	SObject() = default;
-	SObject(const size_t id, const std::string name): Parent(id), name(std::move(name)) {
-		std::cout << "SOBJECT MAKE" << std::endl;
-	}
-
-	void init(const size_t inId, const std::string inName) {
-		id = inId;
-		name = inName;
-		std::cout << "SOBJECT INIT" << std::endl;
-	}
-
-	void destroy() const {
-		std::cout << "SOBJECT " << name << " DESTROY" << std::endl;
-	}
-
-	std::string name = "None";
-
-	virtual void print() const override {
-		std::cout << "ID: " << id << " Name: " << name << std::endl;
-	}
-
-	friend bool operator<(const SObject& fst, const SObject& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const SObject& fst, const SObject& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const SObject& obj) {
-		return obj.id;
-	}
-};
-
-struct TestSObject : Parent {
-
-	TestSObject() = default;
-	TestSObject(const size_t id): Parent(id) {
-		std::cout << "TESTSOBJECT MAKE" << std::endl;
-	}
-
-	void init(const std::string inName) {
-		name = inName;
-		std::cout << "TESTSOBJECT INIT" << std::endl;
-	}
-
-	void init(const std::string inName, const size_t inId) {
-		name = inName;
-		id = inId;
-		std::cout << "TESTSOBJECT INIT 2" << std::endl;
-	}
-
-	void destroy() const {
-		std::cout << "TESTSOBJECT " << name << " DESTROY" << std::endl;
-	}
-
-	std::string name = "None";
-
-	virtual void print() const override {
-		std::cout << "ID: " << id << " Name: " << name << std::endl;
-	}
-
-	friend bool operator<(const TestSObject& fst, const TestSObject& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const TestSObject& fst, const TestSObject& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const TestSObject& obj) {
-		return obj.id;
-	}
-};
-
-template <typename TType>
-struct Test {
-
-	Test() = default;
-
-	template <typename... TArgs>
-	Test(TArgs&&... args)
-	: m_ptr(std::make_shared<TType>(std::forward<TArgs>(args)...)) {}
-
-	std::shared_ptr<TType> m_ptr = nullptr;
-
-};
+#include "TestShared.h"
 
 template <typename TType>
 #if CXX_VERSION >= 20
@@ -170,7 +40,9 @@ void containerTest(const std::string& containerName, TSequenceContainer<TType>& 
 	SHUFFLE(vec, rng);
 
 	container.resize(10, [&](const size_t index) {
-		return TUnfurled<TType>::template create<SObject>(vec[index], containerName);
+		TType obj = TUnfurled<TType>::template create<SObject>(vec[index]);
+		sstl::getUnfurled(obj)->init(containerName);
+		return obj;
 	});
 	assert(container.getSize() == 10);
 
@@ -196,7 +68,8 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "Vector Transfer Test" << std::endl;
 
 		TVector<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>(100));
+		sstl::getUnfurled(from.bottom())->init(containerName);
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -224,7 +97,8 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "List Transfer Test" << std::endl;
 
 		TList<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>(100));
+		sstl::getUnfurled(from.bottom())->init(containerName);
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -268,7 +142,8 @@ void containerTest(const std::string& containerName, TSingleAssociativeContainer
 	size_t i = 0;
 
 	container.resize(10, [&] {
-		auto object = TUnfurled<TType>::template create<SObject>(vec[i], containerName);
+		auto object = TUnfurled<TType>::template create<SObject>(vec[i]);
+		sstl::getUnfurled(object)->init(containerName);
 		++i;
 		return object;
 	});
@@ -292,7 +167,8 @@ void transferTest(const std::string& containerName, TSingleAssociativeContainer<
 		std::cout << "Set Transfer Test" << std::endl;
 
 		TSet<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>(100));
+		sstl::getUnfurled(const_cast<TType&>(from.bottom()))->init(containerName);
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -379,7 +255,8 @@ void containerTest(const std::string& containerName, TAssociativeContainer<MapEn
 	size_t i = 0;
 
 	container.resize(10, [&] {
-		auto pair = TPair<MapEnum, TType>{(MapEnum)vec[i], TUnfurled<TType>::template create<SObject>(vec[i], containerName)};
+		auto pair = TPair<MapEnum, TType>{(MapEnum)vec[i], TUnfurled<TType>::template create<SObject>(vec[i])};
+		sstl::getUnfurled(pair.obj())->init(containerName);
 		++i;
 		return pair;
 	});
@@ -408,7 +285,8 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "Map Transfer Test" << std::endl;
 
 		TMap<MapEnum, TType> from;
-		from.push(MapEnum::NONE, TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(MapEnum::NONE, TUnfurled<TType>::template create<SObject>(100));
+		sstl::getUnfurled(const_cast<TType&>(from.bottom().obj()))->init(containerName);
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -468,95 +346,8 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
 	{ x<MapEnum, TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
 
-template<typename T, typename... TArgs, std::size_t... CtorIdx, std::size_t... InitIdx>
-T make_impl(
-	std::index_sequence<CtorIdx...>,
-	std::index_sequence<InitIdx...>,
-	TArgs&&... args
-) {
-	// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
-	auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
-	using TupleType = decltype(argsTuple);
-
-	// Create the object by getting the arguments associated with it, auto forwards because of argsTuple
-	T obj(std::get<CtorIdx>(std::forward<TupleType>(argsTuple))...);
-
-	// The offset is the last element of CtorIdx, the same as it's size
-	constexpr size_t initOffset = sizeof...(CtorIdx);
-	if constexpr (sstl::is_initializable_v<typename TUnfurled<T>::Type, std::tuple_element_t<initOffset + InitIdx, TupleType>...>) {
-		sstl::getUnfurled(obj)->init(std::get<initOffset + InitIdx>(std::forward<TupleType>(argsTuple))...);
-	}
-	return obj;
-}
-
-// Try all possible prefix sizes (largest first)
-template<typename T, typename... TArgs, std::size_t... Ns>
-T make(std::index_sequence<Ns...>, TArgs&&... args) {
-	// This is the tuple we use to test slicing
-	using Tuple = std::tuple<TArgs&&...>;
-
-	// number of Ctor Args to try and total size of arguments
-	constexpr size_t ctorArgs = sizeof...(Ns);
-	constexpr size_t tupSize = sizeof...(TArgs);
-
-	// We have run out of args, this is an invalid call
-	if constexpr (ctorArgs < 0) {
-		static_assert(0 < sizeof(T), "No such constructor!");
-	// Test if the underlying type is constructible with the elements in Tuple
-	} else if constexpr (std::is_constructible_v<T, std::tuple_element_t<Ns, Tuple>...>) {
-		return make_impl<T>(
-				std::make_index_sequence<ctorArgs>{},
-				std::make_index_sequence<tupSize - ctorArgs>{},
-				std::forward<TArgs>(args)...
-			);
-	} else {
-		// Recursive call if we still have args left to try
-		return make<T>(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
-	}
-}
-
-template<typename T, typename... Args>
-T make(Args&&... args) {
-	// Essentially forward the arguements and create a sequence with the number of arguements
-	return make<T>(std::make_index_sequence<sizeof...(Args)>{}, std::forward<Args>(args)...);
-}
-
+//TODO: TUnfurled create uses init automatically as well
 int main() {
-	const auto obj = make<TestSObject>(100, "Hey");
-	obj.print();
-
-	const auto obj2 = make<TestSObject>("Hey2", 1000);
-	obj2.print();
-
-	const auto obj3 = make<TShared<TestSObject>>(3000, "Hey3");
-	obj3->print();
-
-	const auto obj35 = make<TShared<TestSObject>>(obj3);
-	obj35->print();
-
-	auto obj4 = make<TUnique<TestSObject>>(5000, "Hey5");
-	obj4->print();
-
-	const auto obj5 = make<TUnique<TestSObject>>(std::move(obj4));
-	obj5->print();
-
-	std::cout << "Begin SObject" << std::endl;
-
-	// Prefers constructor for obvious reasons
-	const auto obj6 = make<SObject>(6000, "Hey6");
-	obj6.print();
-
-	auto obj7 = make<TShared<SObject>>(7000, "Hey7");
-	obj7->print();
-
-	const auto obj8 = make<TShared<SObject>>(obj7);
-	obj7->print();
-	obj8->print();
-
-	return 0;
-}
-
-int main2() {
 
 	auto lamb = [](TUnique<Parent>& out) {
 		out = TUnique<SObject>{200, "Hello"};
@@ -566,7 +357,7 @@ int main2() {
 	lamb(obj);
 	obj->print();
 
-	TUnique<Parent> obj01 = SObject{100, "Hello"};
+	TUnique<Parent> obj01 = TUnique<SObject>{100, "Hello"};
 	Parent* parent = obj01.get();
 
 	parent->print();
@@ -620,7 +411,7 @@ int main2() {
 	DO_MAP_TEST(TPriorityMap)
 	DO_MAP_TEST(TPriorityMultiMap)
 
-	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100, "Hey"});
+	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100});
 
 	TUnique<Abstract> abb = TUnique<SObject>{100, "Hey"};
 	TUnique<SObject> abb2 = TUnique<SObject>{100, "Hey"};
@@ -647,19 +438,6 @@ int main2() {
 			std::cout << "Found obb in set" << std::endl;
 		}
 	}
-
-	Test<SObject> testObb = SObject{100, "Hello"};
-
-	testObb.m_ptr->print();
-
-	testObb = SObject{200, "Hello"};
-
-	testObb.m_ptr->print();
-
-	auto oj = SObject{300, "Hello"};
-	testObb = oj;
-
-	testObb.m_ptr->print();
 
 	TShared<SObject> testSharedForWeak{100, "SObject"};
 

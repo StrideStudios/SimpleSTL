@@ -1,65 +1,43 @@
 ﻿#include <iostream>
-#include <random>
 #include <thread>
 
-#include "sstl/List.h"
 #include "sstl/Vector.h"
 #include "sstl/Memory.h"
 #include "sstl/Threading.h"
 
-struct Parent {
-	Parent() = default;
-	Parent(const size_t id): id(id) {}
-	virtual ~Parent() = default;
-	virtual void print() const {
-		std::cout << "ID: " << id << std::endl;
-	}
-
-	friend bool operator<(const Parent& fst, const Parent& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const Parent& fst, const Parent& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const Parent& obj) {
-		return obj.id;
-	}
-
-	int id = 0;
-};
-
-struct SObject : Parent {
-
-	SObject() = default;
-
-	void init(size_t inId, std::string inName) {
-		id = inId;
-		name = inName;
-		std::cout << "INIT SOBJECT" << std::endl;
-	}
-
-	std::string name = "None";
-
-	virtual void print() const override {
-		std::cout << "ID: " << id << " Name: " << name << std::endl;
-	}
-
-	friend bool operator<(const SObject& fst, const SObject& snd) {
-		return fst.id < snd.id;
-	}
-
-	friend bool operator==(const SObject& fst, const SObject& snd) {
-		return fst.id == snd.id;
-	}
-
-	friend size_t getHash(const SObject& obj) {
-		return obj.id;
-	}
-};
+#include "TestShared.h"
 
 int main() {
+
+	TThreadSafe<SObject> obj1{100, "Hey"};
+	obj1->print();
+
+	TThreadSafe<SObject> obj2{"Hey2", 200};
+	obj2->print();
+
+	TThreadSafe<TShared<SObject>> obj3{300, "Hey3"};
+	obj3->print();
+
+	TThreadSafe<TShared<SObject>> obj4{"Hey4", 400};
+	obj4->print();
+
+	TThreadSafe<TShared<SObject>> obj5{obj4};
+	obj4->print();
+	obj5->print();
+
+	TThreadSafe<TUnique<SObject>> obj6{600, "Hey6"};
+	obj6->print();
+
+	TThreadSafe<TUnique<SObject>> obj7{"Hey7", 700};
+	obj7->print();
+
+	TThreadSafe<TUnique<SObject>> obj8{std::move(obj7)};
+	obj8->print();
+
+	return 0;
+}
+
+int main2() {
 
 	TThreadSafe<TVector<TUnique<SObject>>> vec;
 

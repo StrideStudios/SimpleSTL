@@ -15,7 +15,9 @@ struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 	}
 
 	virtual TPair<TKeyType, const TValueType&> bottom() const override {
-		return TPair<TKeyType, const TValueType&>{*m_Container.end()};
+		auto itr = m_Container.end();
+		--itr;
+		return TPair<TKeyType, const TValueType&>{*itr};
 	}
 
 	virtual bool contains(const TKeyType& key) const override {
