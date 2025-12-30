@@ -824,10 +824,10 @@ struct TFrail {
 	: m_ptr(ptr.m_ptr.get()) {}
 
 	TFrail(const std::weak_ptr<TType>& ptr) noexcept
-	: m_ptr(ptr.get()) {}
+	: m_ptr(ptr.lock().get()) {}
 
 	TFrail(std::weak_ptr<TType>& ptr) noexcept
-	: m_ptr(ptr.get()) {}
+	: m_ptr(ptr.lock().get()) {}
 
 	template <typename TOtherType>
 	TFrail(const TShared<TOtherType>& shared) noexcept
