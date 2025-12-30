@@ -80,6 +80,32 @@ namespace sstl {
 			delete ptr;
 		}
 	};
+
+	template <typename TType>
+	void delete_impl(void* p) noexcept {
+		static_assert(0 < sizeof(TType), "Can't delete an incomplete type!");
+		TType* ptr = static_cast<TType*>(p);
+		if constexpr (sstl::is_destroyable_v<TType>) {
+			ptr->destroy();
+		}
+		delete ptr;
+	}
+
+	template <typename TType>
+	struct delayed_deleter {
+		typedef void (*Func)(void* ptr);
+		Func fn = nullptr;
+
+		constexpr delayed_deleter() noexcept = default;
+		constexpr delayed_deleter(const Func fn) noexcept: fn(fn) {}
+
+		template <typename TOtherType, std::enable_if_t<std::is_convertible_v<TOtherType*, TType*>, int> = 0>
+		delayed_deleter(const delayed_deleter<TOtherType>& otr) noexcept: fn(otr.fn) {}
+
+		void operator()(void* ptr) const noexcept {
+			if (fn) fn(ptr);
+		}
+	};
 }
 
 template <typename TType>
@@ -264,7 +290,7 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::unique_ptr<TType, sstl::deleter<TType>>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>()};
+		m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>)};
 
 		// The offset is the last element of CtorIdx, the same as it's size
 		constexpr size_t initOffset = sizeof...(CtorN);
@@ -300,7 +326,7 @@ private:
 		}
 	}
 
-	std::unique_ptr<TType, sstl::deleter<TType>> m_ptr = nullptr;
+	std::unique_ptr<TType, sstl::delayed_deleter<TType>> m_ptr = nullptr;
 
 };
 
@@ -538,7 +564,7 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::unique_ptr<TType, sstl::deleter<TType>>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>()};
+		m_ptr = std::shared_ptr<TType>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>()};
 
 		// The offset is the last element of CtorIdx, the same as it's size
 		constexpr size_t initOffset = sizeof...(CtorN);
@@ -1019,7 +1045,23 @@ private:
 	template <typename>
 	friend struct TFrail;
 
+	template <typename>
+	friend struct TFrailFrom;
+
 	TType* m_ptr = nullptr;
+};
+
+template <typename TType>
+struct TFrailFrom {
+	template <typename TOtherType = TType>
+	_NODISCARD TFrail<TOtherType> getFrail() noexcept {
+		return TFrail<TOtherType>{static_cast<TOtherType*>(this)};
+	}
+
+	template <typename TOtherType = TType>
+	_NODISCARD TFrail<const TOtherType> getFrail() const noexcept {
+		return TFrail<const TOtherType>{static_cast<const TOtherType*>(this)};
+	}
 };
 
 template <typename TType>
@@ -1039,14 +1081,6 @@ struct TSharedFrom {
 	}
 
 	_NODISCARD TWeak<const TType> getWeak() const noexcept {
-		return _Wptr;
-	}
-
-	_NODISCARD TFrail<TType> getFrail() noexcept {
-		return _Wptr;
-	}
-
-	_NODISCARD TFrail<const TType> getFrail() const noexcept {
 		return _Wptr;
 	}
 
