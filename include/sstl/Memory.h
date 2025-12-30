@@ -939,23 +939,23 @@ noexcept {
 	}
 
 	template <typename TOtherType>
-	TOtherType* staticCast() const noexcept {
-		return static_cast<TOtherType*>(m_ptr);
+	TFrail<TOtherType> staticCast() const noexcept {
+		return TFrail<TOtherType>{static_cast<TOtherType*>(m_ptr)};
 	}
 
 	template <typename TOtherType>
-	TShared<TOtherType> dynamicCast() const noexcept {
-		return dynamic_cast<TOtherType*>(m_ptr);
+	TFrail<TOtherType> dynamicCast() const noexcept {
+		return TFrail<TOtherType>{dynamic_cast<TOtherType*>(m_ptr)};
 	}
 
 	template <typename TOtherType>
-	TShared<TOtherType> reinterpretCast() const noexcept {
-		return reinterpret_cast<TOtherType*>(m_ptr);
+	TFrail<TOtherType> reinterpretCast() const noexcept {
+		return TFrail<TOtherType>{reinterpret_cast<TOtherType*>(m_ptr)};
 	}
 
 	template <typename TOtherType>
-	TShared<TOtherType> constCast() const noexcept {
-		return const_cast<TOtherType*>(m_ptr);
+	TFrail<TOtherType> constCast() const noexcept {
+		return TFrail<TOtherType>{const_cast<TOtherType*>(m_ptr)};
 	}
 
 	TType* operator->() const noexcept {
@@ -1013,6 +1013,8 @@ noexcept {
 	}
 
 private:
+
+	explicit TFrail(TType* ptr): m_ptr(ptr) {}
 
 	template <typename>
 	friend struct TFrail;
