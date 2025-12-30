@@ -168,6 +168,11 @@ struct TUnique {
 		return *this;
 	}
 
+	// Releases ownership of the pointer, in this case it will be destroyed
+	void destroy() noexcept {
+		m_ptr.reset();
+	}
+
 	template <typename TOtherType>
 	_CONSTEXPR23 TOtherType* staticCast() const noexcept {
 		return static_cast<TOtherType*>(this->m_ptr.get());
@@ -430,6 +435,11 @@ struct TShared {
 		return *this;
 	}
 
+	// Releases ownership of the pointer, note the object will not be destroyed unless all other shared pointers are
+	void destroy() noexcept {
+		m_ptr.reset();
+	}
+
 	template <typename TOtherType>
 	_CONSTEXPR23 TShared<TOtherType> staticCast() const noexcept {
 		return TShared<TOtherType>{std::static_pointer_cast<TOtherType, TType>(this->m_ptr)};
@@ -665,6 +675,11 @@ noexcept {
 #endif
 		this->m_ptr = std::move(otr.m_ptr);
 		return *this;
+	}
+
+	// Resets weak pointer to an empty state, since this pointer has no ownership it will no destroy any objects
+	void destroy() noexcept {
+		m_ptr.reset();
 	}
 
 	template <typename TOtherType>
