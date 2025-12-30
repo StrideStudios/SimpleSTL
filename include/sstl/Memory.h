@@ -801,7 +801,7 @@ private:
 	template <typename>
 	friend struct TFrail;
 
-	std::weak_ptr<TType> m_ptr = nullptr;
+	std::weak_ptr<TType> m_ptr;
 };
 
 template <typename TType>
