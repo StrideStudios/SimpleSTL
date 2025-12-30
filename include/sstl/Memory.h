@@ -818,10 +818,10 @@ template <typename TType>
 struct TFrail {
 
 	TFrail(const TWeak<TType>& ptr) noexcept
-	: m_ptr(ptr.m_ptr.get()) {}
+	: m_ptr(ptr.m_ptr.lock().get()) {}
 
 	TFrail(TWeak<TType>& ptr) noexcept
-	: m_ptr(ptr.m_ptr.get()) {}
+	: m_ptr(ptr.m_ptr.lock().get()) {}
 
 	TFrail(const std::weak_ptr<TType>& ptr) noexcept
 	: m_ptr(ptr.lock().get()) {}
