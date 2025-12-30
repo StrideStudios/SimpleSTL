@@ -35,11 +35,16 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return CONTAINS(m_Container, obj);
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			return CONTAINS(m_Container, obj);
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
+			// Will compare pointers, is always comparable
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			return contains(*obj);
@@ -47,11 +52,16 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual size_t find(const TType& obj) const override {
-		return DISTANCE(m_Container, obj);
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			return DISTANCE(m_Container, obj);
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
+			// Will compare pointers, is always comparable
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			return find(*obj);
@@ -182,16 +192,21 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual void pop(const TType& obj) override {
-		forEach([&](size_t index, TType& otr) {
-			if (otr == obj) {
-				m_IsPopulated[index] = false;
-			}
-		});
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			forEach([&](size_t index, TType& otr) {
+				if (otr == obj) {
+					m_IsPopulated[index] = false;
+				}
+			});
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
 			forEach([&](size_t index, TType& otr) {
+				// Will compare pointers, is always comparable
 				if (otr.get() == obj) {
 					m_IsPopulated[index] = false;
 				}

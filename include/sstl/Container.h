@@ -30,6 +30,63 @@
 #define GUARANTEED = 0;
 #define NOT_GUARANTEED { throw std::runtime_error("Attempted Usage of unimplemented function in TContainer."); }
 
+namespace sstl {
+#if CXX_VERSION >= 20
+	template <typename TType, typename TOtherType = TType>
+	concept is_equality_comparable_v = requires(TType a, TOtherType b) { a == b; };
+
+	template <typename TType, typename TOtherType = TType>
+	struct is_equality_comparable : std::bool_constant<is_equality_comparable_v<TType, TOtherType>> {};
+
+	template <typename TType, typename TOtherType = TType>
+	concept is_less_than_comparable_v = requires(TType a, TOtherType b) { a < b; };
+
+	template <typename TType, typename TOtherType = TType>
+	struct is_less_than_comparable : std::bool_constant<is_less_than_comparable_v<TType, TOtherType>> {};
+
+	template <typename TType>
+	concept is_hashable_v = requires(TType a) { {getHash(a)} -> std::convertible_to<size_t>; };
+
+	template <typename TType>
+	struct is_hashable : std::bool_constant<is_hashable_v<TType>> {};
+#else
+	template <typename TType, typename TOtherType = TType, typename = void>
+	struct is_equality_comparable : std::false_type {};
+
+	template <typename TType, typename TOtherType>
+	struct is_equality_comparable<TType, TOtherType,
+		std::void_t<decltype(std::declval<TType>() == std::declval<TOtherType>())>
+	> : std::true_type {};
+
+	template <typename TType, typename TOtherType = TType>
+	constexpr bool is_equality_comparable_v = is_equality_comparable<TType, TOtherType>::value;
+
+	template <typename TType, typename TOtherType = TType, typename = void>
+	struct is_less_than_comparable : std::false_type {};
+
+	template <typename TType, typename TOtherType>
+	struct is_less_than_comparable
+	<TType, TOtherType,
+		std::void_t<decltype(std::declval<TType>() < std::declval<TOtherType>())>
+	> : std::true_type {};
+
+	template <typename TType, typename TOtherType = TType>
+	constexpr bool is_less_than_comparable_v = is_less_than_comparable<TType, TOtherType>::value;
+
+	template <typename TType, typename = void>
+	struct is_hashable : std::false_type {};
+
+	template <typename TType,>
+	struct is_hashable
+	<TType,
+		std::void_t<decltype(getHash(std::declval<TType>()))>
+	> : std::true_type {};
+
+	template <typename TType>
+	constexpr bool is_hashable_v = is_hashable<TType>::value;
+#endif
+}
+
 // A basic container of any amount of objects
 // A size of 0 implies a dynamic array
 template <typename TType>
@@ -188,7 +245,10 @@ struct TSequenceContainer {
 };
 
 // Designed to be a container with a key for indexing
-template <typename TKeyType, typename TValueType>
+// Note: always requires a comparable key type
+template <typename TKeyType, typename TValueType,
+	std::enable_if_t<sstl::is_equality_comparable_v<TKeyType>, int> = 0
+>
 struct TAssociativeContainer {
 
 	virtual ~TAssociativeContainer() = default;
@@ -270,7 +330,10 @@ struct TAssociativeContainer {
 };
 
 // Designed to be a container without indexing
-template <typename TType>
+// Note: always requires a comparable type
+template <typename TType,
+	std::enable_if_t<sstl::is_equality_comparable_v<TType>, int> = 0
+>
 struct TSingleAssociativeContainer {
 
 	virtual ~TSingleAssociativeContainer() = default;

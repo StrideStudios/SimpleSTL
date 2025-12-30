@@ -51,7 +51,7 @@ if(NOT SimpleSTL_CXX_STANDARD)
     set(SimpleSTL_CXX_STANDARD ${CMAKE_CXX_STANDARD})
 endif ()
 
-# If CXX Standard is not defined, fallback to c++20
+# If CXX Standard is not defined, fallback to c++17
 if(NOT SimpleSTL_CXX_STANDARD)
     set(SimpleSTL_CXX_STANDARD 17)
     message(WARNING "SimpleSTL: Could not find parent CXX Standard; Using default.")

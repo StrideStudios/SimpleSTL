@@ -19,11 +19,16 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(const TType& obj) const override {
-		return CONTAINS(m_Container, obj);
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			return CONTAINS(m_Container, obj);
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
+			// Will compare pointers, is always comparable
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			return contains(*obj);
@@ -31,11 +36,16 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual size_t find(const TType& obj) const override {
-		return DISTANCE(m_Container, obj);
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			return DISTANCE(m_Container, obj);
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
 		if constexpr (TUnfurled<TType>::isManaged) {
+			// Will compare pointers, is always comparable
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			return find(*obj);
@@ -159,12 +169,17 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void pop(const TType& obj) override {
-		m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
-		m_Size--;
+		if constexpr (sstl::is_equality_comparable_v<TType>) {
+			m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
+			m_Size--;
+		} else {
+			throw std::runtime_error("Type is not comparable!");
+		}
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
 		if constexpr (TUnfurled<TType>::isManaged) {
+			// Will compare pointers, is always comparable
 			m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
 			m_Size--;
 		} else {

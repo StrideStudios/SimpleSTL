@@ -3,7 +3,9 @@
 #include <map>
 #include "Container.h"
 
-template <typename TKeyType, typename TValueType>
+template <typename TKeyType, typename TValueType,
+	std::enable_if_t<sstl::is_less_than_comparable_v<TKeyType>, int> = 0
+>
 struct TPriorityMap : TAssociativeContainer<TKeyType, TValueType> {
 
 	[[nodiscard]] virtual size_t getSize() const override {

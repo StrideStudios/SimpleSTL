@@ -3,7 +3,9 @@
 #include <unordered_set>
 #include "Container.h"
 
-template <typename TType>
+template <typename TType,
+	std::enable_if_t<sstl::is_hashable_v<TType>, int> = 0
+>
 struct TMultiSet : TSingleAssociativeContainer<TType> {
 
 	[[nodiscard]] virtual size_t getSize() const override {

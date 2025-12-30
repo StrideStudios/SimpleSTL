@@ -3,7 +3,9 @@
 #include <unordered_map>
 #include "Container.h"
 
-template <typename TKeyType, typename TValueType>
+template <typename TKeyType, typename TValueType,
+	std::enable_if_t<sstl::is_hashable_v<TKeyType>, int> = 0
+>
 struct TMap : TAssociativeContainer<TKeyType, TValueType> {
 
 	[[nodiscard]] virtual size_t getSize() const override {

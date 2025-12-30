@@ -3,7 +3,9 @@
 #include <set>
 #include "Container.h"
 
-template <typename TType>
+template <typename TType,
+	std::enable_if_t<sstl::is_less_than_comparable_v<TType>, int> = 0
+>
 struct TPrioritySet : TSingleAssociativeContainer<TType> {
 
 	[[nodiscard]] virtual size_t getSize() const override {
