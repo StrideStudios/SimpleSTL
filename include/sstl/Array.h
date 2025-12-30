@@ -88,6 +88,14 @@ struct TArray : TSequenceContainer<TType> {
 		}
 	}
 
+	virtual void fill() {
+		resize(TSize);
+	}
+
+	virtual void resize(std::function<TType(size_t)> func) {
+		resize(TSize, func);
+	}
+
 	virtual TType& push() override {
 		if constexpr (std::is_default_constructible_v<TType>) {
 			return get(push(TType{}));
