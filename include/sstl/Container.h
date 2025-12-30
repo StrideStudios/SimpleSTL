@@ -76,7 +76,7 @@ namespace sstl {
 	template <typename TType, typename = void>
 	struct is_hashable : std::false_type {};
 
-	template <typename TType,>
+	template <typename TType>
 	struct is_hashable
 	<TType,
 		std::void_t<decltype(getHash(std::declval<TType>()))>
