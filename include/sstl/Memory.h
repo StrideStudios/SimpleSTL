@@ -889,6 +889,8 @@ struct TFrail {
 
 	TFrail() = default;
 
+	TFrail(TType* ptr): m_ptr(ptr) {}
+
 	TFrail(nullptr_t) noexcept {}
 
 	TFrail& operator=(nullptr_t) noexcept {
@@ -1040,28 +1042,10 @@ noexcept {
 
 private:
 
-	explicit TFrail(TType* ptr): m_ptr(ptr) {}
-
 	template <typename>
 	friend struct TFrail;
 
-	template <typename>
-	friend struct TFrailFrom;
-
 	TType* m_ptr = nullptr;
-};
-
-template <typename TType>
-struct TFrailFrom {
-	template <typename TOtherType = TType>
-	_NODISCARD TFrail<TOtherType> getFrail() noexcept {
-		return TFrail<TOtherType>{static_cast<TOtherType*>(this)};
-	}
-
-	template <typename TOtherType = TType>
-	_NODISCARD TFrail<const TOtherType> getFrail() const noexcept {
-		return TFrail<const TOtherType>{static_cast<const TOtherType*>(this)};
-	}
 };
 
 template <typename TType>
