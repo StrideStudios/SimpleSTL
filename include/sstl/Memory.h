@@ -136,7 +136,7 @@ struct TUnique {
 #else
 	noexcept
 #endif
-	: m_ptr(ptr) {}
+	: m_ptr(ptr, sstl::delayed_deleter<TOtherType>(&sstl::delete_impl<TOtherType>)) {}
 
 	template <typename... TArgs,
 		std::enable_if_t<
@@ -381,7 +381,7 @@ struct TShared {
 #else
 	noexcept
 #endif
-	: m_ptr(ptr) {}
+	: m_ptr(ptr, sstl::deleter<TType>()) {}
 
 	// prefer init because SharedFrom works there
 	template <typename... TArgs,
