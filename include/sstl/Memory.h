@@ -268,7 +268,7 @@ struct TUnique {
 	}
 
 	_CONSTEXPR23 friend size_t getHash(const TUnique& obj) noexcept {
-		std::hash<std::unique_ptr<TType, sstl::deleter<TType>>> ptrHash;
+		std::hash<std::unique_ptr<TType, sstl::delayed_deleter<TType>>> ptrHash;
 		return ptrHash(obj.m_ptr);
 	}
 
