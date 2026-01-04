@@ -2,6 +2,7 @@
 
 #include <array>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TType, size_t TSize>
 struct TArray : TSequenceContainer<TType> {
@@ -9,6 +10,11 @@ struct TArray : TSequenceContainer<TType> {
 	TArray() {
 		TArray::clear();
 	}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TArray(TArgs&&... args): m_Container{std::forward<TArgs>(args)...} {}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
@@ -43,7 +49,7 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -60,7 +66,7 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -204,7 +210,7 @@ struct TArray : TSequenceContainer<TType> {
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			forEach([&](size_t index, TType& otr) {
 				// Will compare pointers, is always comparable
 				if (otr.get() == obj) {
@@ -249,3 +255,6 @@ protected:
 	std::array<bool, TSize> m_IsPopulated;
 	std::array<TType, TSize> m_Container;
 };
+
+template <typename TType, typename... TArgs>
+TArray(TType, TArgs...) -> TArray<typename sstl::EnforceConvertible<TType, TArgs...>::Type, 1 + sizeof...(TArgs)>;

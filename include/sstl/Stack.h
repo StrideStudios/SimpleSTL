@@ -6,6 +6,18 @@
 template <typename TType>
 struct TStack : TDeque<TType> {
 
+	TStack() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TStack(TInitializerList<TType> init): TDeque<TType>(init) {}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TStack(TArgs&&... args): TDeque<TType>(std::forward<TArgs>(args)...) {}
+
 	virtual void resize(const size_t amt, std::function<TType(size_t)> func) override {
 		const size_t previousSize = TDeque<TType>::getSize();
 		for (size_t i = previousSize; i < amt; ++i) {
@@ -116,3 +128,6 @@ protected:
 		TDeque<TType>::pop(index);
 	}
 };
+
+template <typename TType, typename... TArgs>
+TStack(TType, TArgs...) -> TStack<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;

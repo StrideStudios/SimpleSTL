@@ -3,6 +3,9 @@
 #include <memory>
 
 namespace sstl {
+	template <typename>
+	struct is_managed;
+
 #ifndef SIMPLESTL_INIT
 	template <typename TType, typename... TArgs>
 	constexpr bool is_initializable_v = false;
@@ -114,11 +117,12 @@ struct TUnique {
 	_CONSTEXPR23 TUnique(std::unique_ptr<TType, sstl::deleter<TType>>&& ptr) noexcept
 	: m_ptr(std::move(ptr)) {}
 
-	// If not default constructible, default to nullptr, otherwise, let Args constructor handle it
-	template <typename TOtherType = TType,
-		std::enable_if_t<!std::is_default_constructible_v<TOtherType>, int> = 0
-	>
-	_CONSTEXPR23 TUnique() noexcept {}
+	_CONSTEXPR23 TUnique() noexcept {
+		// If not default constructible, default to nullptr
+		if constexpr (std::is_default_constructible_v<TType>) {
+			m_ptr.reset(new TType());
+		}
+	}
 
 	_CONSTEXPR23 TUnique(nullptr_t) noexcept {}
 
@@ -142,11 +146,11 @@ struct TUnique {
 		std::enable_if_t<
 			std::conjunction_v<
 				std::negation<std::is_null_pointer<std::decay_t<TArgs>>>...,
-				std::negation<std::is_same<std::decay_t<TArgs>, TUnique>>...
+				std::negation<sstl::is_managed<TArgs>>...
 			>,
 			int> = 0
 	>
-	_CONSTEXPR23 TUnique(TArgs&&... args) noexcept {
+	_CONSTEXPR23 explicit TUnique(TArgs&&... args) noexcept {
 		make(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
 	}
 
@@ -290,11 +294,12 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>)};
+		m_ptr.reset(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...));
 
-		// The offset is the last element of CtorIdx, the same as it's size
-		constexpr size_t initOffset = sizeof...(CtorN);
-		if constexpr (sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>) {
+		if constexpr (sizeof...(InitN) > 0) {
+			// The offset is the last element of CtorIdx, the same as it's size
+			constexpr size_t initOffset = sizeof...(CtorN);
+			static_assert(sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
 			m_ptr->init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
 		}
 	}
@@ -330,6 +335,10 @@ private:
 
 };
 
+// Template argument deduction for input of a single type
+template <typename TType>
+TUnique(TType) -> TUnique<TType>;
+
 template <typename>
 struct TWeak;
 
@@ -359,11 +368,12 @@ struct TShared {
 	_CONSTEXPR23 TShared(std::weak_ptr<TOtherType>& shared) noexcept
 	: m_ptr(shared) {}
 
-	// If not default constructible, default to nullptr, otherwise, let Args constructor handle it
-	template <typename TOtherType = TType,
-		std::enable_if_t<!std::is_default_constructible_v<TOtherType>, int> = 0
-	>
-	_CONSTEXPR23 TShared() noexcept {}
+	_CONSTEXPR23 TShared() noexcept {
+		// If not default constructible, default to nullptr
+		if constexpr (std::is_default_constructible_v<TType>) {
+			m_ptr.reset(new TType(), sstl::deleter<TType>());
+		}
+	}
 
 	_CONSTEXPR23 TShared(nullptr_t) noexcept {}
 
@@ -388,11 +398,11 @@ struct TShared {
 		std::enable_if_t<
 			std::conjunction_v<
 				std::negation<std::is_null_pointer<std::decay_t<TArgs>>>...,
-				std::negation<std::is_same<std::decay_t<TArgs>, TShared>>...
+				std::negation<sstl::is_managed<TArgs>>...
 			>,
 			int> = 0
 	>
-	_CONSTEXPR23 TShared(TArgs&&... args) noexcept {
+	_CONSTEXPR23 explicit TShared(TArgs&&... args) noexcept {
 		make(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
 	}
 
@@ -564,11 +574,12 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::shared_ptr<TType>{new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>()};
+		m_ptr.reset(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>());
 
-		// The offset is the last element of CtorIdx, the same as it's size
-		constexpr size_t initOffset = sizeof...(CtorN);
-		if constexpr (sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>) {
+		if constexpr (sizeof...(InitN) > 0) {
+			// The offset is the last element of CtorIdx, the same as it's size
+			constexpr size_t initOffset = sizeof...(CtorN);
+			static_assert(sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
 			m_ptr->init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
 		}
 	}
@@ -603,6 +614,10 @@ private:
 	std::shared_ptr<TType> m_ptr = nullptr;
 
 };
+
+// Template argument deduction for input of a single type
+template <typename TType>
+TShared(TType) -> TShared<TType>;
 
 template <typename TType>
 struct TWeak {
@@ -1122,9 +1137,10 @@ private:
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
 		TOtherType obj(std::get<CtorN>(std::forward<TupleType>(argsTuple))...);
 
-		// The offset is the last element of CtorIdx, the same as it's size
-		constexpr size_t initOffset = sizeof...(CtorN);
-		if constexpr (sstl::is_initializable_v<TOtherType, std::tuple_element_t<initOffset + InitN, TupleType>...>) {
+		if constexpr (sizeof...(InitN) > 0) {
+			// The offset is the last element of CtorIdx, the same as it's size
+			constexpr size_t initOffset = sizeof...(CtorN);
+			static_assert(sstl::is_initializable_v<TOtherType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
 			obj.init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
 		}
 
@@ -1234,7 +1250,7 @@ namespace sstl {
 
 	template <typename TType>
 	_CONSTEXPR23 typename TUnfurled<TType>::Type* getUnfurled(TType& type) {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			return type.get();
 		} else {
 			return &type;
@@ -1243,7 +1259,7 @@ namespace sstl {
 
 	template <typename TType>
 	_CONSTEXPR23 const typename TUnfurled<TType>::Type* getUnfurled(const TType& type) {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			return type.get();
 		} else {
 			return &type;

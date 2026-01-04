@@ -16,6 +16,10 @@ add_executable(SimpleSTL-ThreadedTest
         ThreadedTest.cpp
 )
 
+# Prevent MSVC from complaining about template usage
+target_compile_options(SimpleSTL-Test PRIVATE /bigobj)
+target_compile_options(SimpleSTL-ThreadedTest PRIVATE /bigobj)
+
 target_include_directories(SimpleSTL-Test PUBLIC ../include)
 target_include_directories(SimpleSTL-ThreadedTest PUBLIC ../include)
 

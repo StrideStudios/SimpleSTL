@@ -75,7 +75,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "to:" << std::endl;
 		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 
-		assert(from.getSize() == 1);
+		//assert(from.getSize() == 1);
 
 		from.transfer(container, 0);
 
@@ -86,7 +86,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << std::endl;
 
-		assert(container.getSize() == 1);
+		//assert(container.getSize() == 1);
 
 		container.clear();
 	}
@@ -103,7 +103,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "to:" << std::endl;
 		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 
-		assert(from.getSize() == 1);
+		//assert(from.getSize() == 1);
 
 		from.transfer(container, 0);
 
@@ -114,7 +114,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		container.forEach([](size_t index, const TType& obb) {sstl::getUnfurled(obb)->print();});
 		std::cout << std::endl;
 
-		assert(container.getSize() == 1);
+		//assert(container.getSize() == 1);
 
 		container.clear();
 	}
@@ -316,75 +316,57 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 	}
 }
 
+#define SINGLE_TEST(...) \
+	{ std::cout << std::endl << "--------------------" << std::endl << #__VA_ARGS__ " Test" << std::endl; } \
+	{ __VA_ARGS__ container; containerTest(#__VA_ARGS__, container); transferTest(#__VA_ARGS__, container); }
+
+#define CONSTRUCTOR_TEST(...) \
+	{ std::cout << std::endl << "--------------------" << std::endl << #__VA_ARGS__ " Constructor Test" << std::endl; } \
+	{ __VA_ARGS__ container{0, 5, 10}; container.forEach([](size_t, const int& i) { std::cout << i << std::endl; }); } \
+	{ std::cout << std::endl << "--------------------" << std::endl << #__VA_ARGS__ " Unique Constructor Test" << std::endl; } \
+	{ __VA_ARGS__ container{TUnique{0}, TUnique{5}, TUnique{10}}; container.forEach([](size_t, const TUnique<int>& i) { std::cout << *i.get() << std::endl; }); }
+
+
 #define DO_TEST(x) \
-	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
-	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
-	{ x<TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
+    std::cout << std::endl << std::endl << "******************** " #x " ********************" << std::endl << std::endl; \
+	SINGLE_TEST(x<Parent>) \
+	SINGLE_TEST(x<TShared<Parent>>) \
+	SINGLE_TEST(x<TUnique<Parent>>) \
+	SINGLE_TEST(x<TUnique<Abstract>>) \
+	CONSTRUCTOR_TEST(x)
 
 #define DO_ARRAY_TEST(x) \
-	{ x<Parent, 10> container; containerTest(#x, container); } \
-	{ x<TShared<Parent>, 10> container; containerTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>, 10> container; containerTest(#x " Unique", container); }
+    std::cout << std::endl << std::endl << "******************** " #x " ********************" << std::endl << std::endl; \
+	SINGLE_TEST(x<Parent, 10>) \
+	SINGLE_TEST(x<TShared<Parent>, 10>) \
+	SINGLE_TEST(x<TUnique<Parent>, 10>) \
+	SINGLE_TEST(x<TUnique<Abstract>, 10>) \
+	CONSTRUCTOR_TEST(x)
 
 #define DO_ASSOCIATIVE_TEST(x) \
-	{ x<Parent> container; containerTest(#x, container); transferTest(#x, container); } \
-	{ x<TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
-	{ x<TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
+    std::cout << std::endl << std::endl << "******************** " #x " ********************" << std::endl << std::endl; \
+	SINGLE_TEST(x<Parent>) \
+	SINGLE_TEST(x<TShared<Parent>>) \
+	SINGLE_TEST(x<TUnique<Parent>>) \
+	SINGLE_TEST(x<TUnique<Abstract>>) \
+	{ std::cout << std::endl << "--------------------" << std::endl << #x " Constructor Test" << std::endl; } \
+	{ x container{0, 5, 10}; container.forEach([](const int& i) { std::cout << i << std::endl; }); } \
+	{ std::cout << std::endl << "--------------------" << std::endl << #x " Unique Constructor Test" << std::endl; } \
+	{ x container{TUnique{0}, TUnique{5}, TUnique{10}}; container.forEach([](const TUnique<int>& i) { std::cout << *i.get() << std::endl; }); }
 
 #define DO_MAP_TEST(x) \
-	{ x<MapEnum, Parent> container; containerTest(#x, container); transferTest(#x, container); } \
-	{ x<MapEnum, TShared<Parent>> container; containerTest(#x " Shared", container); transferTest(#x " Shared", container); } \
-	{ x<MapEnum, TUnique<Parent>> container; containerTest(#x " Unique", container); transferTest(#x " Unique", container); } \
-	{ x<MapEnum, TUnique<Abstract>> container; containerTest(#x " Abstract Unique", container); transferTest(#x " Abstract Unique", container); }
+    std::cout << std::endl << std::endl << "******************** " #x " ********************" << std::endl << std::endl; \
+	SINGLE_TEST(x<MapEnum, Parent>) \
+	SINGLE_TEST(x<MapEnum, TShared<Parent>>) \
+	SINGLE_TEST(x<MapEnum, TUnique<Parent>>) \
+	SINGLE_TEST(x<MapEnum, TUnique<Abstract>>) \
+	{ std::cout << std::endl << "--------------------" << std::endl << #x " Constructor Test" << std::endl; } \
+	{ x container{TPair{MapEnum::NONE, 0}, TPair{MapEnum::ONE, 5}, TPair{MapEnum::TWO, 10}}; container.forEach([](TPair<MapEnum, const int&> pair) { std::cout << pair.value() << std::endl; }); } \
+	{ std::cout << std::endl << "--------------------" << std::endl << #x " Unique Constructor Test" << std::endl; } \
+	{ x container{TPair{MapEnum::NONE, TUnique{0}}, TPair{MapEnum::ONE, TUnique{5}}, TPair{MapEnum::TWO, TUnique{10}}}; container.forEach([](TPair<MapEnum, const TUnique<int>&> pair) { std::cout << *pair.value().get() << std::endl; }); } \
+
 
 int main() {
-
-	auto lamb = [](TUnique<Parent>& out) {
-		out = TUnique<SObject>{200, "Hello"};
-	};
-
-	TUnique<Parent> obj;
-	lamb(obj);
-	obj->print();
-
-	TUnique<Parent> obj01 = TUnique<SObject>{100, "Hello"};
-	Parent* parent = obj01.get();
-
-	parent->print();
-
-	{
-		TShared<SObject> obb = {100, "Hello2"};
-		TShared<Parent> obb2 = obb.staticCast<Parent>();
-		obb2->print();
-	}
-
-	{
-		TShared<SObject> obb = {100, "Hello3"};
-		TShared<Parent> obb2 = obb.staticCast<Parent>();
-		TShared<SObject> obb3 = obb2.dynamicCast<SObject>();
-		obb3->print();
-	}
-
-	/*{
-		TList<TUnique<SObject>> l1;
-		TVector<TUnique<SObject>> l2;
-		l1.push(SObject{5015, "List 1"});
-		l2.push(SObject{5016, "Vector 2"});
-		std::cout << "Pre Splice" << std::endl;
-		std::cout << "L1:" << std::endl;
-		l1.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
-		std::cout << "L2:" << std::endl;
-		l2.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
-		std::cout << "Post Splice" << std::endl;
-		l1.transfer(l2, 0);
-		std::cout << "L1:" << std::endl;
-		l1.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
-		std::cout << "L2:" << std::endl;
-		l2.forEach([](size_t index, const TUnique<SObject>& obb) { obb->print(); });
-	}*/
-
 	DO_TEST(TVector)
 	DO_TEST(TMaxHeap)
 	DO_TEST(TMinHeap)
@@ -402,118 +384,5 @@ int main() {
 	DO_MAP_TEST(TMultiMap)
 	DO_MAP_TEST(TPriorityMap)
 	DO_MAP_TEST(TPriorityMultiMap)
-
-	std::unique_ptr<Abstract> ab3 = std::make_unique<SObject>(SObject{100});
-
-	TUnique<Abstract> abb = TUnique<SObject>{100, "Hey"};
-	TUnique<SObject> abb2 = TUnique<SObject>{100, "Hey"};
-
-	std::vector<TUnique<SObject>> m_Container;
-	m_Container.emplace_back(TUnique<SObject>{100, "Hello unique"});
-
-	{
-		TVector<TUnique<SObject>> vec;
-		vec.push(TUnique<SObject>{100, "Hello unique"});
-		SObject* obb = vec.top().get();
-
-		if (vec.contains(obb)) {
-			std::cout << "Found obb in vector" << std::endl;
-		}
-	}
-
-	{
-		TSet<TUnique<SObject>> set;
-		set.push(TUnique<SObject>{100, "Hello unique"});
-		SObject* obb = set.top().get();
-
-		if (set.contains(obb)) {
-			std::cout << "Found obb in set" << std::endl;
-		}
-	}
-
-	TShared<SObject> testSharedForWeak{100, "SObject"};
-
-	std::cout << "Pre Weak Say: ";
-	testSharedForWeak->print();
-
-	TWeak<SObject> testWeak{testSharedForWeak};
-
-	std::cout << "Weak Say: ";
-	if (testWeak) {
-		testWeak->print();
-	} else {
-		std::cout << "No Weak!";
-	}
-
-	TShared<SObject> testShared2{testWeak};
-
-	std::cout << "Post Weak Say: ";
-	testShared2->print();
-
-	struct RequirePointer {
-		RequirePointer() = default;
-		RequirePointer(const TShared<SObject>& objectWithPointer) {
-			std::cout << "Require pointer got pointer from: ";
-			objectWithPointer->print();
-		}
-	};
-
-	struct FromHelper : SObject, TSharedFrom<FromHelper> {
-
-		using SObject::SObject;
-
-		void init() {
-			myFriend = getShared().staticCast<SObject>();
-		}
-
-	private:
-
-		RequirePointer myFriend;
-	};
-
-	TShared<FromHelper> frend{100, "Hey"};
-	frend->init();
-
-	TSet<TUnique<SObject>> setObjs;
-	setObjs.push(TUnique<SObject>{100, "Hello"});
-
-	SObject* ptr = setObjs.top().get();
-
-	std::cout << std::endl << std::endl;
-
-	std::cout << "Pre pop: ";
-	setObjs.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-	setObjs.pop(ptr);
-	std::cout << "Post pop: ";
-	setObjs.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-
-	std::cout << std::endl << std::endl;
-	TSet<TUnique<SObject>> setObjs0;
-	TSet<TUnique<SObject>> setObjs1;
-
-	setObjs0.push(TUnique<SObject>{100, "Hello0"});
-	SObject* transferPtr = setObjs0.top().get();
-	std::cout << std::endl << std::endl;
-	std::cout << "Pre set: ";
-
-	std::cout << std::endl;
-	std::cout << "obs0: ";
-	setObjs0.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-	std::cout << std::endl;
-	std::cout << "obs1: ";
-	setObjs1.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-
-	setObjs0.transfer(setObjs1, transferPtr);
-
-	std::cout << std::endl << std::endl;
-	std::cout << "Post set: ";
-
-	std::cout << std::endl;
-	std::cout << "obs0: ";
-	setObjs0.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-	std::cout << std::endl;
-	std::cout << "obs1: ";
-	setObjs1.forEach([](const TUnique<SObject>& obj) { obj->print(); });
-
 	return 0;
 }

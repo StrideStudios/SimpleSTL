@@ -1,11 +1,23 @@
 ﻿#pragma once
 
 #include <algorithm>
-#include "Container.h"
+#include "Vector.h"
 
 // Priority Vector is a vector that makes itself into a max heap, it is guaranteed the top value is always the largest
 template <typename TType>
 struct TMaxHeap : TVector<TType> {
+
+	TMaxHeap() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TMaxHeap(TInitializerList<TType> init): TVector<TType>(init) {}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TMaxHeap(TArgs&&... args): TVector<TType>(std::forward<TArgs>(args)...) {}
 
 	virtual void resize(size_t amt) override {
 		TVector<TType>::resize(amt);
@@ -46,7 +58,7 @@ struct TMaxHeap : TVector<TType> {
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			ERASE(TVector<TType>::m_Container, obj, TUnfurled<TType>::get);
 			std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 		} else {
@@ -69,3 +81,6 @@ protected:
 		std::make_heap(TVector<TType>::m_Container.begin(), TVector<TType>::m_Container.end(), std::less<TType>{});
 	}
 };
+
+template <typename TType, typename... TArgs>
+TMaxHeap(TType, TArgs...) -> TMaxHeap<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;

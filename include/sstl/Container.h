@@ -30,6 +30,10 @@
 #define GUARANTEED = 0;
 #define NOT_GUARANTEED { throw std::runtime_error("Attempted Usage of unimplemented function in TContainer."); }
 
+inline size_t getHash(const int i) {
+	return i;
+}
+
 namespace sstl {
 #if CXX_VERSION >= 20
 	template <typename TType, typename TOtherType = TType>

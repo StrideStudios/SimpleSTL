@@ -2,11 +2,28 @@
 
 #include <map>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TKeyType, typename TValueType,
 	std::enable_if_t<sstl::is_less_than_comparable_v<TKeyType>, int> = 0
 >
 struct TPriorityMap : TAssociativeContainer<TKeyType, TValueType> {
+
+	TPriorityMap() = default;
+
+	template <typename TOtherValueType = TValueType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherValueType>, int> = 0
+	>
+	TPriorityMap(TInitializerList<TPair<TKeyType, TValueType>> init) {
+		for (auto& pair : init) {
+			m_Container.emplace(pair.first(), pair.second());
+		}
+	}
+
+	template <typename... TPairs>
+	explicit TPriorityMap(TPairs&&... args) {
+		(m_Container.emplace(std::forward<typename TPairs::KeyType>(args.key()), std::forward<typename TPairs::ValueType>(args.value())), ...);
+	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
@@ -143,3 +160,9 @@ protected:
 
 	std::map<TKeyType, TValueType> m_Container;
 };
+
+template <typename TKeyType, typename TValueType>
+TPriorityMap(TInitializerList<TPair<TKeyType, TValueType>>) -> TPriorityMap<TKeyType, TValueType>;
+
+template <typename TPair, typename... TPairs>
+TPriorityMap(TPair, TPairs...) -> TPriorityMap<typename TPair::KeyType, typename TPair::ValueType>;

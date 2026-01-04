@@ -48,23 +48,15 @@ struct Parent : Abstract{
 struct SObject : Parent {
 
     SObject() = default;
-    SObject(const size_t id): Parent(id) {
-        std::cout << "SOBJECT MAKE" << std::endl;
-    }
+    SObject(const size_t id): Parent(id) {}
 
     virtual void init(const std::string inName) override {
         name = inName;
-        std::cout << "SOBJECT INIT" << std::endl;
     }
 
     void init(const std::string inName, const size_t inId) {
         name = inName;
         id = inId;
-        std::cout << "SOBJECT INIT 2" << std::endl;
-    }
-
-    void destroy() const {
-        std::cout << "SOBJECT " << name << " DESTROY" << std::endl;
     }
 
     std::string name = "None";

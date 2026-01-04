@@ -2,9 +2,27 @@
 
 #include <forward_list>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TType>
 struct TForwardList : TSequenceContainer<TType> {
+
+	TForwardList() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TForwardList(TInitializerList<TType> init): m_Container(init) {
+		m_Size = init.size();
+	}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TForwardList(TArgs&&... args) {
+		(m_Container.emplace_front(std::forward<TArgs>(args)), ...);
+		m_Size = sizeof...(TArgs);
+	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Size;
@@ -27,7 +45,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -44,7 +62,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -178,7 +196,7 @@ struct TForwardList : TSequenceContainer<TType> {
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			m_Container.erase_after(std::remove(m_Container.before_begin(), m_Container.end(), obj), m_Container.end());
 			m_Size--;
@@ -217,3 +235,6 @@ protected:
 	std::forward_list<TType> m_Container;
 	size_t m_Size = 0;
 };
+
+template <typename TType, typename... TArgs>
+TForwardList(TType, TArgs...) -> TForwardList<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;

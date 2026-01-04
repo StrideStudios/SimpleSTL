@@ -2,11 +2,27 @@
 
 #include <unordered_set>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TType,
 	std::enable_if_t<sstl::is_hashable_v<TType>, int> = 0
 >
 struct TMultiSet : TSingleAssociativeContainer<TType> {
+
+	TMultiSet() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TMultiSet(TInitializerList<TType> init): m_Container(init) {}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TMultiSet(TArgs&&... args) {
+		m_Container.reserve(sizeof...(TArgs));
+		(m_Container.emplace(std::forward<TArgs>(args)), ...);
+	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
@@ -27,7 +43,7 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			return contains(*obj);
@@ -111,7 +127,7 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			ERASE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
 			pop(*obj);
@@ -130,7 +146,7 @@ struct TMultiSet : TSingleAssociativeContainer<TType> {
 	}
 
 	virtual void transfer(TSingleAssociativeContainer<TType>& otr, typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			if (!this->contains(obj)) return;
 			auto itr = m_Container.extract(FIND(m_Container, obj, TUnfurled<TType>::get));
 			// Prefer move, but copy if not available
@@ -160,3 +176,6 @@ protected:
 
 	std::unordered_multiset<TType, Hasher> m_Container;
 };
+
+template <typename TType, typename... TArgs>
+TMultiSet(TType, TArgs...) -> TMultiSet<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;

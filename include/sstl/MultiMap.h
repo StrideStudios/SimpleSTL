@@ -2,11 +2,30 @@
 
 #include <unordered_map>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TKeyType, typename TValueType,
 	std::enable_if_t<sstl::is_hashable_v<TKeyType>, int> = 0
 >
 struct TMultiMap : TAssociativeContainer<TKeyType, TValueType> {
+
+	TMultiMap() = default;
+
+	template <typename TOtherValueType = TValueType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherValueType>, int> = 0
+	>
+	TMultiMap(TInitializerList<TPair<TKeyType, TValueType>> init) {
+		m_Container.reserve(init.size());
+		for (auto& pair : init) {
+			m_Container.emplace(pair.first(), pair.second());
+		}
+	}
+
+	template <typename... TPairs>
+	explicit TMultiMap(TPairs&&... args) {
+		m_Container.reserve(sizeof...(TPairs));
+		(m_Container.emplace(std::forward<typename TPairs::KeyType>(args.key()), std::forward<typename TPairs::ValueType>(args.value())), ...);
+	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
@@ -154,3 +173,9 @@ protected:
 
 	std::unordered_multimap<TKeyType, TValueType, Hasher> m_Container;
 };
+
+template <typename TKeyType, typename TValueType>
+TMultiMap(TInitializerList<TPair<TKeyType, TValueType>>) -> TMultiMap<TKeyType, TValueType>;
+
+template <typename TPair, typename... TPairs>
+TMultiMap(TPair, TPairs...) -> TMultiMap<typename TPair::KeyType, typename TPair::ValueType>;

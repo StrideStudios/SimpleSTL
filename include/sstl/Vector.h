@@ -2,9 +2,25 @@
 
 #include <vector>
 #include "Container.h"
+#include "InitializerList.h"
 
 template <typename TType>
 struct TVector : TSequenceContainer<TType> {
+
+	TVector() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TVector(TInitializerList<TType> init): m_Container(init) {}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TVector(TArgs&&... args) {
+		m_Container.reserve(sizeof...(TArgs));
+		(m_Container.emplace_back(std::forward<TArgs>(args)), ...);
+	}
 
 	[[nodiscard]] virtual size_t getSize() const override {
 		return m_Container.size();
@@ -35,7 +51,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual bool contains(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return CONTAINS(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -52,7 +68,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual size_t find(typename TUnfurled<TType>::Type* obj) const override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			return DISTANCE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -170,7 +186,7 @@ struct TVector : TSequenceContainer<TType> {
 	}
 
 	virtual void pop(typename TUnfurled<TType>::Type* obj) override {
-		if constexpr (TUnfurled<TType>::isManaged) {
+		if constexpr (sstl::is_managed_v<TType>) {
 			// Will compare pointers, is always comparable
 			ERASE(m_Container, obj, TUnfurled<TType>::get);
 		} else {
@@ -210,3 +226,6 @@ protected:
 
 	std::vector<TType> m_Container;
 };
+
+template <typename TType, typename... TArgs>
+TVector(TType, TArgs...) -> TVector<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;

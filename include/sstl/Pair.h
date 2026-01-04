@@ -7,6 +7,9 @@
 template <typename TKeyType, typename TValueType>
 struct TPair {
 
+	using KeyType = TKeyType;
+	using ValueType = TValueType;
+
     template <class TOtherKeyType = TKeyType, class TOtherValueType = TValueType,
         std::enable_if_t<std::conjunction_v<std::is_default_constructible<TOtherKeyType>, std::is_default_constructible<TOtherValueType>>, int> = 0
 	>
@@ -203,3 +206,21 @@ private:
 	TKeyType m_fst;
 	TValueType m_snd;
 };
+
+template <typename TKeyType, typename TValueType>
+TPair(const std::pair<TKeyType, TValueType>&) -> TPair<TKeyType, TValueType>;
+
+template <typename TKeyType, typename TValueType>
+TPair(std::pair<TKeyType, TValueType>&) -> TPair<TKeyType, TValueType>;
+
+template <typename TKeyType, typename TValueType>
+TPair(std::pair<TKeyType, TValueType>&&) -> TPair<TKeyType, TValueType>;
+
+template <typename TKeyType, typename TValueType>
+TPair(const TKeyType&, const TValueType&) -> TPair<TKeyType, TValueType>;
+
+template <typename TKeyType, typename TValueType>
+TPair(TKeyType&, TValueType&) -> TPair<TKeyType, TValueType>;
+
+template <typename TKeyType, typename TValueType>
+TPair(TKeyType&&, TValueType&&) -> TPair<TKeyType, TValueType>;

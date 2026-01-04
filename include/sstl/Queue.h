@@ -6,6 +6,18 @@
 template <typename TType>
 struct TQueue : TDeque<TType> {
 
+	TQueue() = default;
+
+	template <typename TOtherType = TType,
+		std::enable_if_t<std::is_copy_constructible_v<TOtherType>, int> = 0
+	>
+	TQueue(TInitializerList<TType> init): TDeque<TType>(init) {}
+
+	template <typename... TArgs,
+		std::enable_if_t<std::conjunction_v<std::is_constructible<TType, TArgs>...>, int> = 0
+	>
+	explicit TQueue(TArgs&&... args): TDeque<TType>(std::forward<TArgs>(args)...) {}
+
 	virtual TType& top() override {
 		return TDeque<TType>::m_Container.back();
 	}
@@ -112,3 +124,6 @@ protected:
 		TDeque<TType>::pop(index);
 	}
 };
+
+template <typename TType, typename... TArgs>
+TQueue(TType, TArgs...) -> TQueue<typename sstl::EnforceConvertible<TType, TArgs...>::Type>;
