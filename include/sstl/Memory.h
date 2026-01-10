@@ -227,8 +227,8 @@ struct TUnique {
 		return m_ptr.get();
 	}
 
-	_CONSTEXPR23 TType* operator*() const noexcept {
-		return m_ptr.get();
+	_CONSTEXPR23 TType& operator*() const noexcept {
+		return *m_ptr.get();
 	}
 
 	_CONSTEXPR23 TType* get() const noexcept { return m_ptr.get(); }
@@ -503,8 +503,8 @@ struct TShared {
 		return m_ptr.get();
 	}
 
-	_CONSTEXPR23 TType* operator*() const noexcept {
-		return m_ptr.get();
+	_CONSTEXPR23 TType& operator*() const noexcept {
+		return *m_ptr.get();
 	}
 
 	_CONSTEXPR23 TType* get() const noexcept { return m_ptr.get(); }
@@ -1005,8 +1005,8 @@ noexcept {
 		return m_ptr;
 	}
 
-	TType* operator*() const noexcept {
-		return m_ptr;
+	TType& operator*() const noexcept {
+		return *m_ptr;
 	}
 
 	TType* get() const noexcept { return m_ptr; }

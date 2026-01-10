@@ -26,6 +26,10 @@ struct TVector : TSequenceContainer<TType> {
 		return m_Container.size();
 	}
 
+	TType* data() { return m_Container.data(); }
+
+	const TType* data() const { return m_Container.data(); }
+
 	virtual TType& top() override {
 		return m_Container.front();
 	}
