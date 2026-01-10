@@ -114,7 +114,7 @@ namespace sstl {
 template <typename TType>
 struct TUnique {
 
-	_CONSTEXPR23 TUnique(std::unique_ptr<TType, sstl::deleter<TType>>&& ptr) noexcept
+	_CONSTEXPR23 TUnique(std::unique_ptr<TType, sstl::delayed_deleter<TType>>&& ptr) noexcept
 	: m_ptr(std::move(ptr)) {}
 
 	_CONSTEXPR23 TUnique() noexcept {
