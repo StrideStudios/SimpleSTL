@@ -121,6 +121,9 @@ struct TUnique {
 		// If not default constructible, default to nullptr
 		if constexpr (std::is_default_constructible_v<TType>) {
 			m_ptr.reset(new TType());
+			if constexpr (sstl::is_initializable_v<TType>) {
+				m_ptr->init();
+			}
 		}
 	}
 
@@ -372,6 +375,9 @@ struct TShared {
 		// If not default constructible, default to nullptr
 		if constexpr (std::is_default_constructible_v<TType>) {
 			m_ptr.reset(new TType(), sstl::deleter<TType>());
+			if constexpr (sstl::is_initializable_v<TType>) {
+				m_ptr->init();
+			}
 		}
 	}
 
