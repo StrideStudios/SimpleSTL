@@ -120,7 +120,7 @@ struct TUnique {
 	_CONSTEXPR23 TUnique() noexcept {
 		// If not default constructible, default to nullptr
 		if constexpr (std::is_default_constructible_v<TType>) {
-			m_ptr.reset(new TType());
+			m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>(new TType(), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>));
 			if constexpr (sstl::is_initializable_v<TType>) {
 				m_ptr->init();
 			}
@@ -297,7 +297,7 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr.reset(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...));
+		m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>));
 
 		if constexpr (sizeof...(InitN) > 0) {
 			// The offset is the last element of CtorIdx, the same as it's size
@@ -374,7 +374,7 @@ struct TShared {
 	_CONSTEXPR23 TShared() noexcept {
 		// If not default constructible, default to nullptr
 		if constexpr (std::is_default_constructible_v<TType>) {
-			m_ptr.reset(new TType(), sstl::deleter<TType>());
+			m_ptr = std::shared_ptr<TType>(new TType(), sstl::deleter<TType>());
 			if constexpr (sstl::is_initializable_v<TType>) {
 				m_ptr->init();
 			}
@@ -580,7 +580,7 @@ private:
 		using TupleType = decltype(argsTuple);
 
 		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr.reset(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>());
+		m_ptr = std::shared_ptr<TType>(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>());
 
 		if constexpr (sizeof...(InitN) > 0) {
 			// The offset is the last element of CtorIdx, the same as it's size
