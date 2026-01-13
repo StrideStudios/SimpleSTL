@@ -9,9 +9,18 @@ project(
         LANGUAGES CXX C
 )
 
-option(SIMPLESTL_TEST "Enable Testing SimpleSTL Features" ${PROJECT_IS_TOP_LEVEL})
-option(SIMPLESTL_INIT "Enable The auto init function call" On)
-option(SIMPLESTL_DESTROY "Enable The auto destroy function call" On)
+option(SIMPLESTL_TEST "Enable testing SimpleSTL features" ${PROJECT_IS_TOP_LEVEL})
+
+# Automatically call init on a type when created, can be used with vararg constructor as well, with the init args being after the ctor args
+option(SIMPLESTL_INIT "Enable the auto init ability" On)
+
+# Automatically call a destroy function on the type when destroyed, release will overwrite this behavior
+option(SIMPLESTL_DESTROY "Enable the auto destroy ability" On)
+
+# Initially disabled unless for testing, Release can be dangerous if used unknowingly, should only be enabled if you know what it does
+# Allows you to specify a release function in the memory's types, which removes all deletion capability from the pointer,
+# giving the ability to self-release the memory.  Can cause memory leaks if used improperly.
+option(SIMPLESTL_RELEASE "Enable the release auto function ability" ${PROJECT_IS_TOP_LEVEL})
 
 add_library(SimpleSTL INTERFACE
         # Base Classes
@@ -54,10 +63,10 @@ endif ()
 # If CXX Standard is not defined, fallback to c++17
 if(NOT SimpleSTL_CXX_STANDARD)
     set(SimpleSTL_CXX_STANDARD 17)
-    message(WARNING "SimpleSTL: Could not find parent CXX Standard; Using default.")
+    message(WARNING "SimpleSTL: Could not find parent CXX standard; Using default.")
 endif()
 
-message(STATUS "SimpleSTL: Using CXX Version ${SimpleSTL_CXX_STANDARD}")
+message(STATUS "SimpleSTL: Using CXX version ${SimpleSTL_CXX_STANDARD}")
 
 # Create Macro with CXX Version
 target_compile_definitions(SimpleSTL INTERFACE CXX_VERSION=${SimpleSTL_CXX_STANDARD})
@@ -67,6 +76,9 @@ if(SIMPLESTL_INIT)
 endif()
 if(SIMPLESTL_DESTROY)
     target_compile_definitions(SimpleSTL INTERFACE SIMPLESTL_DESTROY)
+endif()
+if(SIMPLESTL_RELEASE)
+    target_compile_definitions(SimpleSTL INTERFACE SIMPLESTL_RELEASE)
 endif()
 
 # Ensure target is compiled with CXX Version

@@ -8,20 +8,17 @@ project(
         SimpleSTLTest
 )
 
-add_executable(SimpleSTL-Test
-        Test.cpp
-)
+function(addTest Name)
 
-add_executable(SimpleSTL-ThreadedTest
-        ThreadedTest.cpp
-)
+    add_executable(SimpleSTL-${Name}
+        "${Name}.cpp"
+    )
+    # Prevent MSVC from complaining about template usage
+    target_compile_options(SimpleSTL-${Name} PRIVATE /bigobj)
+    target_include_directories(SimpleSTL-${Name} PUBLIC ../include)
+    target_link_libraries(SimpleSTL-${Name} SimpleSTL)
+endfunction()
 
-# Prevent MSVC from complaining about template usage
-target_compile_options(SimpleSTL-Test PRIVATE /bigobj)
-target_compile_options(SimpleSTL-ThreadedTest PRIVATE /bigobj)
-
-target_include_directories(SimpleSTL-Test PUBLIC ../include)
-target_include_directories(SimpleSTL-ThreadedTest PUBLIC ../include)
-
-target_link_libraries(SimpleSTL-Test SimpleSTL)
-target_link_libraries(SimpleSTL-ThreadedTest SimpleSTL)
+addTest(Test)
+addTest(ThreadedTest)
+addTest(ReleaseTest)

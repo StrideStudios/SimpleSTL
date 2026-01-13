@@ -7,7 +7,7 @@ namespace sstl {
 	struct is_managed;
 
 #ifndef SIMPLESTL_INIT
-	template <typename TType, typename... TArgs>
+	template <typename, typename...>
 	constexpr bool is_initializable_v = false;
 
 	template <typename TType, typename... TArgs>
@@ -23,7 +23,7 @@ namespace sstl {
 		template <typename TType, typename... TArgs>
 		struct is_initializable : std::bool_constant<is_initializable_v<TType, TArgs...>> {};
 	#else
-		template <typename, typename TType, typename... TArgs>
+		template <typename, typename, typename...>
 		struct is_initializable : std::false_type {};
 
 		template <typename TType, typename... TArgs>
@@ -39,7 +39,7 @@ namespace sstl {
 #endif
 
 #ifndef SIMPLESTL_DESTROY
-	template <typename TType>
+	template <typename>
 	constexpr bool is_destroyable_v = false;
 
 	template <typename TType>
@@ -47,15 +47,15 @@ namespace sstl {
 #else
 	#if CXX_VERSION >= 20
 		template <typename TType>
-		concept is_destroyable =
+		concept is_destroyable_v =
 		requires(TType& obj) {
 			obj.destroy();
 		};
 
 		template <typename TType>
-		constexpr bool is_destroyable_v = is_destroyable<TType>;
+		struct is_destroyable : std::bool_constant<is_destroyable_v<TType>> {};
 	#else
-		template <typename TType, typename = void>
+		template <typename, typename = void>
 		struct is_destroyable : std::false_type {};
 
 		template <typename TType>
@@ -68,6 +68,37 @@ namespace sstl {
 		constexpr bool is_destroyable_v = is_destroyable<TType>::value;
 	#endif
 #endif
+
+#ifndef SIMPLESTL_RELEASE
+	template <typename>
+	constexpr bool is_releasable_v = false;
+
+	template <typename TType>
+	struct is_releasable : std::bool_constant<is_releasable_v<TType>> {};
+#else
+	#if CXX_VERSION >= 20
+		template <typename TType>
+		concept is_releasable =
+		requires(TType& obj) {
+			obj.release();
+		};
+
+		template <typename TType>
+		constexpr bool is_releasable_v = is_releasable<TType>;
+
+	#else
+		template <typename, typename = void>
+		struct is_releasable : std::false_type {};
+
+		template <typename TType>
+		struct is_releasable<TType, std::void_t<decltype(std::declval<TType&>().release())>>
+			: std::true_type {};
+
+		template <typename TType>
+		constexpr bool is_releasable_v = is_releasable<TType>::value;
+	#endif
+#endif
+
 	template <typename TType>
 	struct deleter {
 		constexpr deleter() noexcept = default;
@@ -77,10 +108,14 @@ namespace sstl {
 
 		void operator()(TType* ptr) const noexcept {
 			static_assert(0 < sizeof(TType), "Can't delete an incomplete type!");
-			if constexpr (sstl::is_destroyable_v<TType>) {
-				ptr->destroy();
+			if constexpr (sstl::is_releasable_v<TType>) {
+				ptr->release();
+			} else {
+				if constexpr (sstl::is_destroyable_v<TType>) {
+					ptr->destroy();
+				}
+				delete ptr;
 			}
-			delete ptr;
 		}
 	};
 
@@ -88,10 +123,14 @@ namespace sstl {
 	void delete_impl(void* p) noexcept {
 		static_assert(0 < sizeof(TType), "Can't delete an incomplete type!");
 		TType* ptr = static_cast<TType*>(p);
-		if constexpr (sstl::is_destroyable_v<TType>) {
-			ptr->destroy();
+		if constexpr (sstl::is_releasable_v<TType>) {
+			ptr->release();
+		} else {
+			if constexpr (sstl::is_destroyable_v<TType>) {
+				ptr->destroy();
+			}
+			delete ptr;
 		}
-		delete ptr;
 	}
 
 	template <typename TType>
@@ -107,6 +146,19 @@ namespace sstl {
 
 		void operator()(void* ptr) const noexcept {
 			if (fn) fn(ptr);
+		}
+	};
+
+	template <typename TType>
+	struct SharedDeleter {
+		using Type = TType;
+
+		void operator()(TType* ptr) const noexcept {
+			static_assert(0 < sizeof(TType), "Can't delete an incomplete type!");
+			if constexpr (sstl::is_destroyable_v<TType>) {
+				ptr->destroy();
+			}
+			delete ptr;
 		}
 	};
 }
@@ -478,6 +530,10 @@ struct TShared {
 #endif
 		this->m_ptr = std::move(otr.m_ptr);
 		return *this;
+	}
+
+	size_t count() const noexcept {
+		return m_ptr.use_count();
 	}
 
 	// Releases ownership of the pointer, note the object will not be destroyed unless all other shared pointers are
