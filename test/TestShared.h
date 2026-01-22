@@ -5,7 +5,6 @@ struct Abstract {
     Abstract(const size_t id): id(id) {}
     virtual ~Abstract() = default;
     virtual void print() const = 0;
-    virtual void init(std::string inName) = 0;
 
     friend bool operator<(const Abstract& fst, const Abstract& snd) {
         return fst.id < snd.id;
@@ -25,12 +24,10 @@ struct Abstract {
 struct Parent : Abstract{
     Parent() = default;
     Parent(const size_t id): Abstract(id) {}
-    virtual ~Parent() = default;
-    virtual void print() const {
+    virtual ~Parent() override = default;
+    virtual void print() const override {
         std::cout << "ID: " << id << std::endl;
     }
-
-    virtual void init(std::string inName) override {}
 
     friend bool operator<(const Parent& fst, const Parent& snd) {
         return fst.id < snd.id;
@@ -48,16 +45,7 @@ struct Parent : Abstract{
 struct SObject : Parent {
 
     SObject() = default;
-    SObject(const size_t id): Parent(id) {}
-
-    virtual void init(const std::string inName) override {
-        name = inName;
-    }
-
-    void init(const std::string inName, const size_t inId) {
-        name = inName;
-        id = inId;
-    }
+    SObject(const size_t id, const std::string inName): Parent(id), name(inName) {}
 
     std::string name = "None";
 

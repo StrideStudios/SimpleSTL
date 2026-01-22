@@ -6,9 +6,14 @@
 int main() {
 
     struct Releaser {
+
+        ~Releaser() {
+            std::cout << "Called Releaser Destructor" << std::endl;
+        }
+
         void release() const {
-            delete this;
             std::cout << "Removed Releaser" << std::endl;
+            delete this;
         }
     };
 

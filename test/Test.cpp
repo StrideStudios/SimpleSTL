@@ -67,7 +67,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "Vector Transfer Test" << std::endl;
 
 		TVector<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>((size_t)100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -95,7 +95,7 @@ void transferTest(const std::string& containerName, TSequenceContainer<TType>& c
 		std::cout << "List Transfer Test" << std::endl;
 
 		TList<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>((size_t)100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -163,7 +163,7 @@ void transferTest(const std::string& containerName, TSingleAssociativeContainer<
 		std::cout << "Set Transfer Test" << std::endl;
 
 		TSet<TType> from;
-		from.push(TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(TUnfurled<TType>::template create<SObject>((size_t)100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;
@@ -279,7 +279,7 @@ void transferTest(const std::string& containerName, TAssociativeContainer<MapEnu
 		std::cout << "Map Transfer Test" << std::endl;
 
 		TMap<MapEnum, TType> from;
-		from.push(MapEnum::NONE, TUnfurled<TType>::template create<SObject>(100, containerName));
+		from.push(MapEnum::NONE, TUnfurled<TType>::template create<SObject>((size_t)100, containerName));
 
 		std::cout << "Pre Transfer" << std::endl;
 		std::cout << "from:" << std::endl;

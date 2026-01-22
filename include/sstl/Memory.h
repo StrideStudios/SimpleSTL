@@ -7,34 +7,33 @@ namespace sstl {
 	struct is_managed;
 
 #ifndef SIMPLESTL_INIT
-	template <typename, typename...>
+	template <typename>
 	constexpr bool is_initializable_v = false;
 
-	template <typename TType, typename... TArgs>
-	struct is_initializable : std::bool_constant<is_initializable_v<TType, TArgs...>> {};
+	template <typename TType>
+	struct is_initializable : std::bool_constant<is_initializable_v<TType>> {};
 #else
 	#if CXX_VERSION >= 20
-		template <typename TType, typename... TArgs>
+		template <typename TType>
 		concept is_initializable_v =
-		requires(TType& obj, TArgs&&... args) {
-			obj.init(std::forward<TArgs>(args)...);
+		requires(TType& obj) {
+			obj.init();
 		};
 
-		template <typename TType, typename... TArgs>
-		struct is_initializable : std::bool_constant<is_initializable_v<TType, TArgs...>> {};
+		template <typename TType>
+		struct is_initializable : std::bool_constant<is_initializable_v<TType>> {};
 	#else
-		template <typename, typename, typename...>
+		template <typename, typename>
 		struct is_initializable : std::false_type {};
 
-		template <typename TType, typename... TArgs>
+		template <typename TType>
 		struct is_initializable<
-			std::void_t<decltype(std::declval<TType&>().init(std::declval<TArgs>()...))>,
-			TType,
-			TArgs...
+			std::void_t<decltype(std::declval<TType&>().init())>,
+			TType
 		> : std::true_type {};
 
-	template <typename TType, typename... TArgs>
-	constexpr bool is_initializable_v = is_initializable<void, TType, TArgs...>::value;
+	template <typename TType>
+	constexpr bool is_initializable_v = is_initializable<void, TType>::value;
 	#endif
 #endif
 
@@ -206,7 +205,10 @@ struct TUnique {
 			int> = 0
 	>
 	_CONSTEXPR23 explicit TUnique(TArgs&&... args) noexcept {
-		make(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
+		m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>(new TType(std::forward<TArgs>(args)...), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>));
+		if constexpr (sstl::is_initializable_v<TType>) {
+			m_ptr->init();
+		}
 	}
 
 	template <typename TOtherType = TType,
@@ -338,54 +340,6 @@ private:
 	template <typename>
 	friend struct TFrail;
 
-	template<typename... TArgs, std::size_t... CtorN, std::size_t... InitN>
-	void make_impl(
-		std::index_sequence<CtorN...>,
-		std::index_sequence<InitN...>,
-		TArgs&&... args
-	) {
-		// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
-		auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
-		using TupleType = decltype(argsTuple);
-
-		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::unique_ptr<TType, sstl::delayed_deleter<TType>>(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::delayed_deleter<TType>(&sstl::delete_impl<TType>));
-
-		if constexpr (sizeof...(InitN) > 0) {
-			// The offset is the last element of CtorIdx, the same as it's size
-			constexpr size_t initOffset = sizeof...(CtorN);
-			static_assert(sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
-			m_ptr->init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
-		}
-	}
-
-	// Try all possible prefix sizes (largest first)
-	template<typename... TArgs, std::size_t... N>
-	void make(std::index_sequence<N...>, TArgs&&... args) {
-		// This is the tuple we use to test slicing
-		using Tuple = std::tuple<TArgs&&...>;
-
-		// number of Ctor Args to try and total size of arguments
-		constexpr size_t ctorArgs = sizeof...(N);
-		constexpr size_t tupSize = sizeof...(TArgs);
-
-		// We have run out of args, this is an invalid call
-		if constexpr (ctorArgs == 0 && !std::is_default_constructible_v<TType>) {
-			static_assert(0 < sizeof(TType), "No such constructor!");
-		}
-		// Test if the underlying type is constructible with the elements in Tuple
-		if constexpr (std::is_constructible_v<TType, std::tuple_element_t<N, Tuple>...>) {
-			make_impl(
-					std::make_index_sequence<ctorArgs>{},
-					std::make_index_sequence<tupSize - ctorArgs>{},
-					std::forward<TArgs>(args)...
-				);
-		} else {
-			// Recursive call if we still have args left to try
-			make(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
-		}
-	}
-
 	std::unique_ptr<TType, sstl::delayed_deleter<TType>> m_ptr = nullptr;
 
 };
@@ -461,7 +415,10 @@ struct TShared {
 			int> = 0
 	>
 	_CONSTEXPR23 explicit TShared(TArgs&&... args) noexcept {
-		make(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
+		m_ptr = std::shared_ptr<TType>(new TType(std::forward<TArgs>(args)...), sstl::deleter<TType>());
+		if constexpr (sstl::is_initializable_v<TType>) {
+			m_ptr->init();
+		}
 	}
 
 	template <typename TOtherType = TType,
@@ -624,54 +581,6 @@ private:
 
 	template <typename>
 	friend struct TFrail;
-
-	template<typename... TArgs, std::size_t... CtorN, std::size_t... InitN>
-	void make_impl(
-		std::index_sequence<CtorN...>,
-		std::index_sequence<InitN...>,
-		TArgs&&... args
-	) {
-		// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
-		auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
-		using TupleType = decltype(argsTuple);
-
-		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_ptr = std::shared_ptr<TType>(new TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...), sstl::deleter<TType>());
-
-		if constexpr (sizeof...(InitN) > 0) {
-			// The offset is the last element of CtorIdx, the same as it's size
-			constexpr size_t initOffset = sizeof...(CtorN);
-			static_assert(sstl::is_initializable_v<TType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
-			m_ptr->init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
-		}
-	}
-
-	// Try all possible prefix sizes (largest first)
-	template<typename... TArgs, std::size_t... N>
-	void make(std::index_sequence<N...>, TArgs&&... args) {
-		// This is the tuple we use to test slicing
-		using Tuple = std::tuple<TArgs&&...>;
-
-		// number of Ctor Args to try and total size of arguments
-		constexpr size_t ctorArgs = sizeof...(N);
-		constexpr size_t tupSize = sizeof...(TArgs);
-
-		// We have run out of args, this is an invalid call
-		if constexpr (ctorArgs == 0 && !std::is_default_constructible_v<TType>) {
-			static_assert(0 < sizeof(TType), "No such constructor!");
-		}
-		// Test if the underlying type is constructible with the elements in Tuple
-		if constexpr (std::is_constructible_v<TType, std::tuple_element_t<N, Tuple>...>) {
-			make_impl(
-					std::make_index_sequence<ctorArgs>{},
-					std::make_index_sequence<tupSize - ctorArgs>{},
-					std::forward<TArgs>(args)...
-				);
-		} else {
-			// Recursive call if we still have args left to try
-			make(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
-		}
-	}
 
 	std::shared_ptr<TType> m_ptr = nullptr;
 
@@ -1181,59 +1090,11 @@ noexcept(std::is_nothrow_convertible_v<TOtherType, TType>) {
 #else
 noexcept {
 #endif
-		return make<TType>(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
-	}
-
-private:
-
-	template<typename TOtherType, typename... TArgs, std::size_t... CtorN, std::size_t... InitN>
-	static TOtherType make_impl(
-		std::index_sequence<CtorN...>,
-		std::index_sequence<InitN...>,
-		TArgs&&... args
-	) {
-		// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
-		auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
-		using TupleType = decltype(argsTuple);
-
-		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		TOtherType obj(std::get<CtorN>(std::forward<TupleType>(argsTuple))...);
-
-		if constexpr (sizeof...(InitN) > 0) {
-			// The offset is the last element of CtorIdx, the same as it's size
-			constexpr size_t initOffset = sizeof...(CtorN);
-			static_assert(sstl::is_initializable_v<TOtherType, std::tuple_element_t<initOffset + InitN, TupleType>...>, "Unused arguments or invalid Constructor!");
-			obj.init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
+		TOtherType obj{std::forward<TArgs>(args)...};
+		if constexpr (sstl::is_initializable_v<TOtherType>) {
+			obj.init();
 		}
-
 		return obj;
-	}
-
-	// Try all possible prefix sizes (largest first)
-	template<typename TOtherType, typename... TArgs, std::size_t... N>
-	static TOtherType make(std::index_sequence<N...>, TArgs&&... args) {
-		// This is the tuple we use to test slicing
-		using Tuple = std::tuple<TArgs&&...>;
-
-		// number of Ctor Args to try and total size of arguments
-		constexpr size_t ctorArgs = sizeof...(N);
-		constexpr size_t tupSize = sizeof...(TArgs);
-
-		// We have run out of args, this is an invalid call
-		if constexpr (ctorArgs == 0 && !std::is_default_constructible_v<TOtherType>) {
-			static_assert(0 < sizeof(TOtherType), "No such constructor!");
-		}
-		// Test if the underlying type is constructible with the elements in Tuple
-		if constexpr (std::is_constructible_v<TOtherType, std::tuple_element_t<N, Tuple>...>) {
-			return make_impl<TOtherType>(
-					std::make_index_sequence<ctorArgs>{},
-					std::make_index_sequence<tupSize - ctorArgs>{},
-					std::forward<TArgs>(args)...
-				);
-		} else {
-			// Recursive call if we still have args left to try
-			return make<TOtherType>(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
-		}
 	}
 };
 

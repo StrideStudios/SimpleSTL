@@ -27,7 +27,11 @@ public:
 	 * Mutex cannot be copied nor moved, so we ignore it
 	 */
 
-	TThreadSafe() noexcept {}
+	TThreadSafe() noexcept {
+		if constexpr (sstl::is_initializable_v<TType>) {
+			m_obj.init();
+		}
+	}
 
 	template <typename... TArgs,
 		std::enable_if_t<
@@ -37,8 +41,11 @@ public:
 			>,
 			int> = 0
 	>
-	TThreadSafe(TArgs&&... args) noexcept {
-		make(std::make_index_sequence<sizeof...(TArgs)>{}, std::forward<TArgs>(args)...);
+	explicit TThreadSafe(TArgs&&... args) noexcept {
+		m_obj = TType{std::forward<TArgs>(args)...};
+		if constexpr (sstl::is_initializable_v<TType>) {
+			m_obj.init();
+		}
 	}
 
 	template <typename TOtherType = TType,
@@ -184,53 +191,6 @@ public:
 private:
 	template <typename>
 	friend class TThreadSafe;
-
-	template<typename... TArgs, std::size_t... CtorN, std::size_t... InitN>
-	void make_impl(
-		std::index_sequence<CtorN...>,
-		std::index_sequence<InitN...>,
-		TArgs&&... args
-	) {
-		// To prevent multiple forwards for args, create a forwarding tuple and forward arguments from it
-		auto argsTuple = std::forward_as_tuple(std::forward<TArgs>(args)...);
-		using TupleType = decltype(argsTuple);
-
-		// Create the object by getting the arguments associated with it, auto-forwards because of argsTuple
-		m_obj = TType(std::get<CtorN>(std::forward<TupleType>(argsTuple))...);
-
-		// The offset is the last element of CtorIdx, the same as it's size
-		constexpr size_t initOffset = sizeof...(CtorN);
-		if constexpr (sstl::is_initializable_v<typename TUnfurled<TType>::Type, std::tuple_element_t<initOffset + InitN, TupleType>...>) {
-			sstl::getUnfurled(m_obj)->init(std::get<initOffset + InitN>(std::forward<TupleType>(argsTuple))...);
-		}
-	}
-
-	// Try all possible prefix sizes (largest first)
-	template<typename... TArgs, std::size_t... N>
-	void make(std::index_sequence<N...>, TArgs&&... args) {
-		// This is the tuple we use to test slicing
-		using Tuple = std::tuple<TArgs&&...>;
-
-		// number of Ctor Args to try and total size of arguments
-		constexpr size_t ctorArgs = sizeof...(N);
-		constexpr size_t tupSize = sizeof...(TArgs);
-
-		// We have run out of args, this is an invalid call
-		if constexpr (ctorArgs == 0 && !std::is_default_constructible_v<typename TUnfurled<TType>::Type>) {
-			static_assert(0 < sizeof(TType), "No such constructor!");
-		}
-		// Test if the underlying type is constructible with the elements in Tuple
-		if constexpr (std::is_constructible_v<typename TUnfurled<TType>::Type, std::tuple_element_t<N, Tuple>...>) {
-			make_impl(
-					std::make_index_sequence<ctorArgs>{},
-					std::make_index_sequence<tupSize - ctorArgs>{},
-					std::forward<TArgs>(args)...
-				);
-		} else {
-			// Recursive call if we still have args left to try
-			make(std::make_index_sequence<ctorArgs - 1>{}, std::forward<TArgs>(args)...);
-		}
-	}
 
 	TType m_obj;
 

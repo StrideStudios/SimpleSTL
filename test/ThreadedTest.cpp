@@ -9,36 +9,6 @@
 
 int main() {
 
-	TThreadSafe<SObject> obj1{100, "Hey"};
-	obj1->print();
-
-	TThreadSafe<SObject> obj2{"Hey2", 200};
-	obj2->print();
-
-	TThreadSafe<TShared<SObject>> obj3{300, "Hey3"};
-	obj3->print();
-
-	TThreadSafe<TShared<SObject>> obj4{"Hey4", 400};
-	obj4->print();
-
-	TThreadSafe<TShared<SObject>> obj5{obj4};
-	obj4->print();
-	obj5->print();
-
-	TThreadSafe<TUnique<SObject>> obj6{600, "Hey6"};
-	obj6->print();
-
-	TThreadSafe<TUnique<SObject>> obj7{"Hey7", 700};
-	obj7->print();
-
-	TThreadSafe<TUnique<SObject>> obj8{std::move(obj7)};
-	obj8->print();
-
-	return 0;
-}
-
-int main2() {
-
 	TThreadSafe<TVector<TUnique<SObject>>> vec;
 
 	char c = 'y';
