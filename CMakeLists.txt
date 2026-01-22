@@ -11,7 +11,7 @@ project(
 
 option(SIMPLESTL_TEST "Enable testing SimpleSTL features" ${PROJECT_IS_TOP_LEVEL})
 
-# Automatically call init on a type when created, can be used with vararg constructor as well, with the init args being after the ctor args
+# Automatically call init on a type when created
 option(SIMPLESTL_INIT "Enable the auto init ability" On)
 
 # Automatically call a destroy function on the type when destroyed, release will overwrite this behavior
